@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta name="viewport" content="initial-scale=1, width=device-width">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+        <link href="styles.css" rel="stylesheet">
+        <title>Test</title>
+        <script>
+
+            function goToPage(url){
+                window.open(url, '_blank').focus();
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                let socials = document.querySelectorAll(".social_button");
+                for (let i = 0; i < socials.length; i++) {
+                    socials[i].addEventListener('click', function() {
+                        goToPage(socials[i].id)
+                    });
+                }
+            });
+
+        </script>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Welcome to my Webpage!</h1>
+        </div>
+        <div class="menu">
+            <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #EA8462">
+                <h3>Learn More:</h3>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                    <div class="navbar-nav">
+                    <a class="nav-item nav-link disabled" href="index.html">Home</a>
+                    <a class="nav-item nav-link disabled" href="about.html">About Me</a>
+                    <a class="nav-item nav-link disabled" href="interests.html">Interests</a>
+                    <a class="nav-item nav-link disabled" href="startup.html">Startup</a>
+                    </div>
+                </div>
+                </nav>
+        </div>
+        <div class="container">
+            <img src="cs50_1.jpg" alt="cs50">
+            <h2>This is the hompage for my CS50 website.</h2>
+            <p>
+            I am a first-year studying computer science at Harvard College. This webpage is a component of CS50's problem set 8.
+            </p>
+            <h2>Connect with Me</h2>
+            <p>
+                You can find me on the following platforms:
+            </p>
+            <button class="social_button" id="https://www.facebook.com/grayson.martin.37">Facebook</button>
+            <button class="social_button" id="https://www.linkedin.com/in/grayson-martin-4458a4203">LinkedIn</button>
+            <button class="social_button" id="https://github.com/GraysonMMartin">Github</button>
+        </div>
+    </body>
+</html>
