@@ -1,68 +1,11 @@
-img, .img_button {
-    max-height: 70vh;
-    max-width: 80vw;
-    padding-bottom: 15px;
-    width: auto;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+/* Size for brand */
+nav .navbar-brand
+{
+    font-size: xx-large;
 }
 
-small {
-    display: block;
-}
-
-.container {
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-bottom: 15px;
-}
-
-.header {
-    background-color: #EB4F1B;
-    color: #fff;
-    padding: 2rem 1rem;
-    text-align: center;
-}
-
-.menu {
-    background-color: #EA8462;
-    color: #fff;
-    margin-bottom: 2rem;
-    padding: 1rem 1rem;
-    text-align: center;
-}
-
-.nav-link {
-    color: white !important;
-    font-size: 1.5em !important;
-    padding-left: 1em !important;
-}
-
-.disabled {
-    color: gray !important;
-}
-
-.centered {
-    text-align: center;
-}
-
-.social_button {
-    background-color: #d9edff;
-    border: 1px solid transparent;
-    border-radius: 0.25rem;
-    font-size: 0.95rem;
-    font-weight: 400;
-    line-height: 1.5;
-    padding: 0.375rem 0.75rem;
-    text-align: center;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    vertical-align: middle;
-}
-
-.img_button {
-    background: transparent;
-    border: none !important;
+/* Colors for brand */
+nav .navbar-brand .blue
+{
+    color: #537fbe;
 }
