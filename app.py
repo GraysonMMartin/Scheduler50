@@ -136,26 +136,39 @@ def create():
                 title, session["user_id"], start_date, end_date, description, location)
 
         guest = db.execute("SELECT id FROM users WHERE username = ?", request.form.get("invitee"))[0].get("id")
-        current_event = db.execute("SELECT MAX(id) AS id FROM events WHERE owner_id = ?", session["user_id"])[0].get("id")
+        current_id = db.execute("SELECT MAX(id) AS id FROM events WHERE owner_id = ?", session["user_id"])[0].get("id")
+        current_event = db.execute("SELECT * FROM events WHERE id = ?", current_id)[0]
 
-        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_event, session["user_id"], 1)
-        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_event, guest, 0)
+        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, session["user_id"], 1)
+        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, guest, 0)
 
-        return redirect("/selecttimes")
+        return render_template("selecttimes.html", event=current_event)
 
     else:
-        return render_template("create.html")
+        return render_template("create.html", event=None)
 
 @app.route("/edit", methods=["GET", "POST"])
 @login_required
 def edit():
     if request.method == "POST":
         #update event table with new info
+        title = request.form.get("title")
+        start = request.form.get("start_date")
+        start_date = start[5:8] + start[8:] + "-" + start[:4]
+        end = request.form.get("end_date")
+        end_date = end[5:8] + end[8:] + "-" + end[:4]
+        description = request.form.get("description")
+        location = request.form.get("location")
+        event_id = request.form.get("event_id")
+
+        db.execute("UPDATE events SET title = ?, start_date = ?, end_date = ?, description = ?, location = ? WHERE id = ?",
+                title, start_date, end_date, description, location, event_id)
+        # update ateendees
         return redirect("/")
     else:
         event_id = int(request.args.get("event_id"))
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)
-        return render_template("create.html", event=event)
+        return render_template("create.html", event=event[0])
 
 @app.route("/selecttimes", methods=["GET", "POST"])
 @login_required
@@ -165,4 +178,4 @@ def selecttimes():
     else:
         event_id = int(request.args.get("event_id"))
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)
-        return render_template("selecttimes.html", event=event)
+        return render_template("selecttimes.html", event=event[0])
