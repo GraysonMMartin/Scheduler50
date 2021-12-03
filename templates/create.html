@@ -4,6 +4,35 @@
     Create
 {% endblock %}
 
+{% block scripts %}
+    <script type='text/javascript'>
+
+        function newField(i){
+            container.appendChild(document.createTextNode("Member " + (i+1)));
+                // Create an <input> element, set its type and name attributes
+                var input = document.createElement("input");
+                input.type = "text";
+                input.name = "member" + i;
+                container.appendChild(input);
+                // Append a line break 
+                container.appendChild(document.createElement("br"));
+        }
+        var i = 0;
+        function addFields(){
+            // Number of inputs to create
+            var number = document.getElementById("member").value;
+            // Container <div> where dynamic content will be placed
+            var container = document.getElementById("container");
+            // Clear previous contents of the container
+            while (container.hasChildNodes()) {
+                container.removeChild(container.lastChild);
+            }
+            i = i + 1;
+            newField(i);
+        }
+    </script>
+{% endblock %}
+
 {% block main %}
     <form action="/create" method="post">
         <div class="mb-3">
@@ -19,9 +48,16 @@
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="location" name="location" placeholder="Location" type="text" required>
         </div>
-        <div class="mb-3">
+        <!-- <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="invitee" name="invitee" placeholder="Invitee Username" type="text" required>
+        </div> -->
+
+        <div class="mb-3">
+            <input type="text" id="member" name="member" value="">Number of members: (max. 10)<br />
+            <button type="button" id="filldetails" onclick="addFields()">+</button>
+            <div id="container"/>
         </div>
+
         <button class="btn btn-primary" type="submit">Create</button>
     </form>
 {% endblock %}

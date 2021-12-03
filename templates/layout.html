@@ -18,6 +18,8 @@
 
         <title>Scheduler50 |{% block title %}{% endblock %}</title>
 
+        {% block scripts %}{% endblock %}
+
     </head>
 
     <body>
@@ -32,6 +34,7 @@
                     {% if session["user_id"] %}
                         <ul class="navbar-nav me-auto mt-2">
                             <li class="nav-item"><a class="nav-link" href="/create">Create</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/preferences">Preferences</a></li>
                         </ul>
                         <ul class="navbar-nav ms-auto mt-2">
                             <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
