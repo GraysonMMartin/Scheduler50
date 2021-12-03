@@ -19,11 +19,15 @@
                 <td>
                     {% if event.owner_id == user_id %}
                     <form action="/edit">
-                        <input type="submit" value="Edit">
+                        <input class="btn btn-primary" type="submit" value="Edit">
                     </form>
                     {% endif %}
                 </td>
-                <td>{{ event.title }}</td>
+                <td>
+                  <form action="/selecttimes">
+                    <input class="btn astext" type="submit" value="{{ event.id }}" name="event_id">
+                  </form>
+                </td>
                 <td>{{ event.start_date + " - " + event.end_date }}</td>
             </tr>
             {% endfor %}

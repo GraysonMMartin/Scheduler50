@@ -27,6 +27,7 @@ def after_request(response):
     return response
 
 @app.route("/")
+@login_required
 def home():
     events = db.execute("SELECT * FROM events WHERE id IN (SELECT event_id FROM attendees WHERE person_id = ?)", session["user_id"])
     return render_template("index.html", events=events, user_id=session["user_id"])
@@ -109,7 +110,16 @@ def logout():
     # Redirect user to login form
     return redirect("/login")
 
+@app.route("/preferences", methods=["GET", "POST"])
+@login_required
+def preferences():
+    if request.method == "POST":
+        return apology("d")
+    else:
+        return render_template("preferences.html")
+
 @app.route("/create", methods=["GET", "POST"])
+@login_required
 def create():
     """Create a new event"""
     if request.method == "POST":
@@ -131,7 +141,17 @@ def create():
         db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_event, session["user_id"], 1)
         db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_event, guest, 0)
 
-        return redirect("/")
+        return redirect("/selecttimes")
 
     else:
         return render_template("create.html")
+
+@app.route("/selecttimes", methods=["GET", "POST"])
+@login_required
+def selecttimes():
+    if request.method == "POST":
+        return apology("laksjf")
+    else:
+        event_id = int(request.args.get("event_id"))
+        event = db.execute("SELECT * FROM events WHERE id = ?", event_id)
+        return render_template("selecttimes.html", event=event)
