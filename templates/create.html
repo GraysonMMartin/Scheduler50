@@ -10,6 +10,7 @@
 {% block main %}
     {% if event is not none %}
     <form action="/edit" method="post">
+        <input name="event_id" type="hidden" value="{{ event.id }}">
     {% else %}
     <form action="/create" method="post">
     {% endif %}
