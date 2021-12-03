@@ -8,7 +8,11 @@
 {% endblock %}
 
 {% block main %}
+    {% if event is not none %}
+    <form action="/edit" method="post">
+    {% else %}
     <form action="/create" method="post">
+    {% endif %}
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="title" name="title" placeholder="Title" type="text" required>
         </div>

@@ -146,6 +146,17 @@ def create():
     else:
         return render_template("create.html")
 
+@app.route("/edit", methods=["GET", "POST"])
+@login_required
+def edit():
+    if request.method == "POST":
+        #update event table with new info
+        return redirect("/")
+    else:
+        event_id = int(request.args.get("event_id"))
+        event = db.execute("SELECT * FROM events WHERE id = ?", event_id)
+        return render_template("create.html", event=event)
+
 @app.route("/selecttimes", methods=["GET", "POST"])
 @login_required
 def selecttimes():

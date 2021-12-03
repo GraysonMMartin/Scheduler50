@@ -19,13 +19,15 @@
                 <td>
                     {% if event.owner_id == user_id %}
                     <form action="/edit">
+                        <input name="event_id" type="hidden" value="{{ event.id }}">
                         <input class="btn btn-primary" type="submit" value="Edit">
                     </form>
                     {% endif %}
                 </td>
                 <td>
                   <form action="/selecttimes">
-                    <input class="btn astext" type="submit" value="{{ event.id }}" name="event_id">
+                    <input name="event_id" type="hidden" value="{{ event.id }}">
+                    <input class="btn astext" type="submit" value="{{ event.title }}">
                   </form>
                 </td>
                 <td>{{ event.start_date + " - " + event.end_date }}</td>
