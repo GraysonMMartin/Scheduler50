@@ -4,6 +4,177 @@
     Preferences
 {% endblock %}
 
-{% block main %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let cells = document.querySelectorAll("td");
+        for (let i = 0; i < cells.length; i++){
+            cells[i].addEventListener('mousedown', function(){
+                if (cells[i].getAttributeNode("value").value == "unavailable"){
+                    cells[i].getAttributeNode("value").value = "available";
+                    cells[i].getAttributeNode("class").value = "bg-red";
+                }
+                else{
+                    cells[i].getAttributeNode("value").value = "unavailable";
+                    cells[i].getAttributeNode("class").value = "bg-white";
+                }
+            })
+        }
+    });
 
+</script>
+
+{% endblock %}
+
+{% block main %}
+<h2>Select Times You Will Never Be Available</h2>
+<table class="table" id="time_preferences">
+    <thead>
+        <tr>
+            <th>
+                Sunday
+            </th>
+            <th>
+                Monday
+            </th>
+            <th>
+                Tuesday
+            </th>
+            <th>
+                Wednesday
+            </th>
+            <th>
+                Thursday
+            </th>
+            <th>
+                Friday
+            </th>
+            <th>
+                Saturday
+            </th>
+        </tr>
+    </thead>
+    <tbody class="unhighlightable">
+        <tr>
+            <td value="available" class="bg-white">
+                12 AM - 1 AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                1AM - 2AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                2AM - 3AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                3AM - 4AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                4AM - 5AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                5AM - 6AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                6AM - 7AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                7AM - 8AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                8AM - 9AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                9AM - 10AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                10AM - 11AM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                11AM - 12PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                12PM - 1PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                1PM - 2PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                2PM - 3PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                3PM - 4PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                4PM - 5PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                5PM - 6PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                6PM - 7PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                7PM - 8PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                8PM - 9PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                9PM - 10PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                10PM - 11PM
+            </td>
+        </tr>
+        <tr>
+            <td value="available" class="bg-white">
+                11PM - 12AM
+            </td>
+        </tr>
+    </tbody>
+</table>
 {% endblock %}

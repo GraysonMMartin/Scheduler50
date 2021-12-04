@@ -9,3 +9,21 @@ nav .navbar-brand .blue
 {
     color: #537fbe;
 }
+
+td.bg-red {
+    background-color: #ff0000;
+  }
+
+td.bg-white {
+    background-color: white;
+}
+
+.unhighlightable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: -moz-none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
