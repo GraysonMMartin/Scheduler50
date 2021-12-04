@@ -135,17 +135,45 @@ def create():
         db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
                 title, session["user_id"], start_date, end_date, description, location)
 
-        guest = db.execute("SELECT id FROM users WHERE username = ?", request.form.get("invitee"))[0].get("id")
         current_id = db.execute("SELECT MAX(id) AS id FROM events WHERE owner_id = ?", session["user_id"])[0].get("id")
         current_event = db.execute("SELECT * FROM events WHERE id = ?", current_id)[0]
+        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, session["user_id"], 0)
 
-        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, session["user_id"], 1)
-        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, guest, 0)
+        current_invitees = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
+                        current_id)
 
-        return render_template("selecttimes.html", event=current_event)
+        return render_template("addinvitees.html", event=current_event, invitees=current_invitees)
 
     else:
         return render_template("create.html", event=None)
+
+@app.route("/addinvitees", methods=["POST"])
+@login_required
+def addinvitees():
+    if request.method == "POST":
+        guest = db.execute("SELECT id FROM users WHERE username = ?", request.form.get("invitee"))
+        if not guest:
+            return apology("That username does not exist")
+        guest_id = guest[0].get("id")
+        current_id = int(request.form.get("event_id"))
+        current_event = db.execute("SELECT * FROM events WHERE id = ?", current_id)[0]
+        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, guest_id, 0)
+        current_invitees = db.execute("SELECT * FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
+                        current_id)
+        
+        return render_template("addinvitees.html", event=current_event, invitees=current_invitees)
+
+@app.route("/removeinvitee", methods=["POST"])
+@login_required
+def removeinvitee():
+    if request.method == "POST":
+        guest_id = db.execute("SELECT id FROM users WHERE username = ?", request.form.get("invitee"))[0].get("id")
+        current_id = int(request.form.get("event_id"))
+        db.execute("DELETE FROM attendees WHERE event_id = ? AND person_id = ?", current_id, guest_id)
+        current_event = db.execute("SELECT * FROM events WHERE id = ?", current_id)[0]
+        current_invitees = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
+                        current_id)
+        return render_template("addinvitees.html", event=current_event, invitees=current_invitees)
 
 @app.route("/edit", methods=["GET", "POST"])
 @login_required
@@ -170,6 +198,14 @@ def edit():
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)
         return render_template("create.html", event=event[0])
 
+@app.route("/delete_event")
+@login_required
+def delete_event():
+    event_id = int(request.args.get("event_id"))
+    db.execute("DELETE FROM attendees WHERE event_id = ?", event_id)
+    db.execute("DELETE FROM events WHERE id = ?", event_id)
+    return redirect("/")
+
 @app.route("/selecttimes", methods=["GET", "POST"])
 @login_required
 def selecttimes():
@@ -177,5 +213,5 @@ def selecttimes():
         return apology("laksjf")
     else:
         event_id = int(request.args.get("event_id"))
-        event = db.execute("SELECT * FROM events WHERE id = ?", event_id)
-        return render_template("selecttimes.html", event=event[0])
+        event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
+        return render_template("selecttimes.html", event=event)
