@@ -7,6 +7,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import apology, login_required
 
+import datetime
+LOCAL_TIMEZONE = datetime.datetime.now().astimezone().tzinfo
+
 app = Flask(__name__)
 
 # Allows changes to show actively instead of restarting flask
@@ -210,6 +213,8 @@ def delete_event():
 @login_required
 def selecttimes():
     if request.method == "POST":
+        
+        datetime.datetime.now().astimezone().tzinfo
         return apology("laksjf")
     else:
         event_id = int(request.args.get("event_id"))
