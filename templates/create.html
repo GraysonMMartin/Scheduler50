@@ -9,6 +9,10 @@
 
 {% block main %}
     {% if event is not none %}
+    <form action="/delete_event">
+        <input name="event_id" type="hidden" value="{{ event.id }}">
+        <button class="btn btn-primary" type="submit">DELETE EVENT</button>
+    </form>
     <form action="/edit" method="post">
         <input name="event_id" type="hidden" value="{{ event.id }}">
     {% else %}
@@ -27,10 +31,7 @@
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="location" name="location" placeholder="Location" type="text" required>
         </div>
-        <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="invitee" name="invitee" placeholder="Invitee Username" type="text" required>
-        </div>
 
-        <button class="btn btn-primary" type="submit">Create</button>
+        <button class="btn btn-primary" type="submit">Next</button>
     </form>
 {% endblock %}

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add Invitees {{ event.title }}
+{% endblock %}
+
+{% block main %}
+    <h2>Add Users to {{ event.title }}</h2>
+    <div class="mb-3">
+        {% for invitee in invitees[1:] %}
+            <p>
+                {{ invitee.username }}
+                <form action="/removeinvitee" method="post">
+                    <div class="mb-3">
+                        <input type="hidden" value="{{ event.id }}" name="event_id">
+                        <input type="hidden" value="{{ invitee.username }}" name="invitee">
+                        <button class="btn btn-primary" type="submit">Delete</button>
+                    </div>
+                </form>
+            </p>
+        {% endfor %}
+    </div>
+    <form action="/addinvitees" method="post">
+        <input type="hidden" value="{{ event.id }}" name="event_id">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="invitee" name="invitee" placeholder="Username" type="text" required>
+            <button type="submit" class="btn btn-primary">+</button>
+        </div>
+    </form>
+    <form action="/selecttimes" method="get">
+        <div class="mb-3">
+            <input type="hidden" value="{{ event.id }}" name="event_id">
+            <button class="btn btn-primary" type="submit">Next</button>
+        </div>
+    </form>
+{% endblock %}
