@@ -125,6 +125,7 @@ def preferences():
 def create():
     """Create a new event"""
     current_id = db.execute("SELECT MAX(id) AS id FROM events WHERE owner_id = ?", session["user_id"])[0].get("id")
+    current_event = db.execute("SELECT * FROM events WHERE id = ?", current_id)[0]
     if request.method == "POST":
 
         title = request.form.get("title")
@@ -142,7 +143,6 @@ def create():
         db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
                 title, session["user_id"], start_date, end_date, description, location)
 
-        current_event = db.execute("SELECT * FROM events WHERE id = ?", current_id)[0]
         db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, session["user_id"], 0)
 
         current_invitees = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
@@ -151,7 +151,7 @@ def create():
         return render_template("addinvitees.html", event=current_event, invitees=current_invitees)
 
     else:
-        return render_template("create.html", event=current_id, current_date = datetime.today().strftime('%Y-%m-%d'))
+        return render_template("create.html", event = None, current_date = datetime.today().strftime('%Y-%m-%d'))
 
 @app.route("/addinvitees", methods=["POST"])
 @login_required
