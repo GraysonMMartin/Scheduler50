@@ -5,6 +5,7 @@ import urllib.parse
 from flask import redirect, render_template, request, session
 from functools import wraps
 
+from datetime import datetime, date
 
 def apology(message, code=400):
     """Render message as an apology to user."""
@@ -33,3 +34,19 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
+
+def valid_date(start_date,end_date):
+    """
+    Check if the user enter's a valid date
+    """
+    current_date = datetime.today()
+    start_date_dateform = datetime.strptime(start_date, '%m-%d-%Y')
+    end_date_dateform = datetime.strptime(end_date, '%m-%d-%Y')
+
+    if (end_date_dateform - start_date_dateform).days < 0:
+        return False
+
+    if (current_date - start_date_dateform).days > 0:
+        return False
+        
+    return True
