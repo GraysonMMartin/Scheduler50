@@ -5,10 +5,7 @@ from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, login_required
-
-import datetime
-LOCAL_TIMEZONE = datetime.datetime.now().astimezone().tzinfo
+from helpers import apology, login_required, valid_date
 
 app = Flask(__name__)
 
@@ -135,6 +132,10 @@ def create():
         description = request.form.get("description")
         location = request.form.get("location")
 
+        #Check that the date is valid
+        if not valid_date(start_date,end_date):
+          return apology("Please enter a valid date", 403)
+
         db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
                 title, session["user_id"], start_date, end_date, description, location)
 
@@ -191,6 +192,10 @@ def edit():
         description = request.form.get("description")
         location = request.form.get("location")
         event_id = request.form.get("event_id")
+
+        #Check that the date is valid
+        if not valid_date(start_date,end_date):
+          return apology("Please enter a valid date", 403)
 
         db.execute("UPDATE events SET title = ?, start_date = ?, end_date = ?, description = ?, location = ? WHERE id = ?",
                 title, start_date, end_date, description, location, event_id)
