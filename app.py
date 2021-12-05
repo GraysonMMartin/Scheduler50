@@ -154,7 +154,6 @@ def create():
 
         # Get the latest eventID
         current_event = db.execute("SELECT * FROM events WHERE id = (SELECT MAX(id) AS id FROM events WHERE owner_id = ?)", session["user_id"])
-        print(current_event)
         current_id = current_event[0].get("id")
 
         # Create a new attendenace entry into attendees (this is for the currrent user)
@@ -163,9 +162,8 @@ def create():
         # Get the usernames of those who will attend
         current_invitees = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
                         current_id)
-        print(current_invitees)
 
-        return render_template("addinvitees.html", event=current_event, invitees=current_invitees)
+        return render_template("addinvitees.html", event=current_event[0], invitees=current_invitees)
 
     else:
         return render_template("create.html", event = None, current_date = datetime.today().strftime('%Y-%m-%d'))
