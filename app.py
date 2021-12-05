@@ -232,5 +232,12 @@ def selecttimes():
         return render_template("index.html", events=events, user_id=session["user_id"])
     else:
         event_id = int(request.args.get("event_id"))
-        event = db.execute("SELECT * FROM events WHERE id = ?", event_id)
-        return render_template("selecttimes.html", event=event[0])
+        event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
+        return render_template("selecttimes.html", event=event)
+
+@app.route("/set_preferences", methods=["POST"])
+@login_required
+def set_preferences():
+    preferences = request.form.getlist('preferences[]')
+    print(preferences)
+    return redirect("/")
