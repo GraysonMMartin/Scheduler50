@@ -6,21 +6,46 @@
 
 {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let cells = document.querySelectorAll("td");
-        for (let i = 0; i < cells.length; i++){
-            cells[i].addEventListener('mousedown', function(){
-                if (cells[i].getAttributeNode("value").value == "unavailable"){
-                    cells[i].getAttributeNode("value").value = "available";
-                    cells[i].getAttributeNode("class").value = "bg-red";
-                }
-                else{
-                    cells[i].getAttributeNode("value").value = "unavailable";
-                    cells[i].getAttributeNode("class").value = "bg-white";
-                }
-            })
+
+    function addTable() {
+        var preferencesTable = document.getElementById("preferencesTable");
+
+        var tableBody = document.createElement('TBODY');
+        tableBody.className = "unhighlightable";
+        preferencesTable.appendChild(tableBody);
+
+        const timeSlots = ["12 AM - 1 AM", "1 AM - 2 AM", "2 AM - 3 AM", "3 AM - 4 AM", "4 AM - 5 AM", "5 AM - 6 AM", "6 AM - 7 AM"
+                        , "7 AM - 8 AM", "8 AM - 9 AM", "9 AM - 10 AM", "10 AM - 11 AM", "11 AM - 12 PM", "12 PM - 1 PM", "1 PM - 2 PM"
+                        , "2 PM - 3 PM", "3 PM - 4 PM", "4 PM - 5 PM", "5 PM - 6 PM", "6 PM - 7 PM", "7 PM - 8 PM", "8 PM - 9 PM"
+                        , "9 PM - 10 PM", "10 PM - 11 PM", "11 PM - 12 AM"]
+
+        for (var i = 0; i < 24; i++) {
+            var tr = document.createElement('TR');
+            tableBody.appendChild(tr);
+
+            for (var j = 0; j < 7; j++) {
+                var td = document.createElement('TD');
+                td.setAttribute('class', 'bg-white')
+                td.setAttribute('value', 'available')
+                td.setAttribute('name', 'preferences')
+                td.setAttribute('onmousedown', 'updateAvailability(this)')
+                td.appendChild(document.createTextNode(timeSlots[i]));
+                tr.appendChild(td);
+            }
         }
-    });
+        myTableDiv.appendChild(table);
+    }
+
+    function updateAvailability(cell) {
+        if (cell.getAttributeNode("value").value == "available"){
+            cell.getAttributeNode("value").value = "unavailable";
+            cell.getAttributeNode("class").value = "bg-red";
+        }
+        else{
+            cell.getAttributeNode("value").value = "available";
+            cell.getAttributeNode("class").value = "bg-white";
+        }
+    }
 
 </script>
 
@@ -28,7 +53,7 @@
 
 {% block main %}
 <h2>Select Times You Will Never Be Available</h2>
-<table class="table" id="time_preferences">
+<table id="preferencesTable" class="table">
     <thead>
         <tr>
             <th>
@@ -54,127 +79,25 @@
             </th>
         </tr>
     </thead>
-    <tbody class="unhighlightable">
-        <tr>
-            <td value="available" class="bg-white">
-                12 AM - 1 AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                1AM - 2AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                2AM - 3AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                3AM - 4AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                4AM - 5AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                5AM - 6AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                6AM - 7AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                7AM - 8AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                8AM - 9AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                9AM - 10AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                10AM - 11AM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                11AM - 12PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                12PM - 1PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                1PM - 2PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                2PM - 3PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                3PM - 4PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                4PM - 5PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                5PM - 6PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                6PM - 7PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                7PM - 8PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                8PM - 9PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                9PM - 10PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                10PM - 11PM
-            </td>
-        </tr>
-        <tr>
-            <td value="available" class="bg-white">
-                11PM - 12AM
-            </td>
-        </tr>
-    </tbody>
+    <script>addTable();</script>
 </table>
+<button class="btn btn-primary" type="button" onclick="submit()">Update</button>
+
+<script>
+    $("button").click(function() {
+        var arr = [];
+        $("td").each(function() {
+            arr.push(this.getAttributeNode("value").value);
+        });
+        $.ajax({
+            url: '/set_preferences',
+            type: 'POST',
+            data: {
+                preferences: arr
+            },
+            success: function(response){ window.location.href = "/"; }
+        });
+    });
+</script>
+
 {% endblock %}
