@@ -96,6 +96,13 @@ def login():
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
+        if(db.execute("SELECT COUNT(*) AS count FROM availability WHERE user_id = ?", session["user_id"])[0].get("count") == 0):
+            db.execute("INSERT INTO availability(user_id) VALUES(?)", session["user_id"])
+            for i in range(24):
+                for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+                    column_name = j+str(i)
+                    db.execute("UPDATE availability SET ? = 1 WHERE user_id = ?", column_name, session["user_id"])
+
         # Redirect user to home page
         return redirect("/")
 
@@ -126,8 +133,6 @@ def preferences():
 def create():
     """Create a new event"""
 
-    # Get the latest eventID
-    current_event = db.execute("SELECT * FROM events WHERE id = (SELECT MAX(id) AS id FROM events WHERE owner_id = ?)", session["user_id"][0].get("id"))
     if request.method == "POST":
         
         # Get the user input from the form
@@ -147,12 +152,18 @@ def create():
         db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
                 title, session["user_id"], start_date, end_date, description, location)
 
+        # Get the latest eventID
+        current_event = db.execute("SELECT * FROM events WHERE id = (SELECT MAX(id) AS id FROM events WHERE owner_id = ?)", session["user_id"])
+        print(current_event)
+        current_id = current_event[0].get("id")
+
         # Create a new attendenace entry into attendees (this is for the currrent user)
-        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_event.id, session["user_id"], 0)
+        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, session["user_id"], 0)
 
         # Get the usernames of those who will attend
         current_invitees = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
                         current_id)
+        print(current_invitees)
 
         return render_template("addinvitees.html", event=current_event, invitees=current_invitees)
 
@@ -268,9 +279,12 @@ def selecttimes():
 @app.route("/set_preferences", methods=["POST"])
 @login_required
 def set_preferences():
-    # TODO
-    preferences = request.form.getlist('preferences[]')
-    print(preferences)
+    preferences = list(map(int, request.form.getlist('preferences[]')))
+    k = 0
+    for i in range(24):
+        for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+            db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", j+str(i), preferences[k], session["user_id"])
+            k += 1
     return redirect("/")
 
 @app.route("/contacts", methods=["GET"])
