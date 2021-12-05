@@ -45,6 +45,19 @@ def valid_date(start_date,end_date):
 
     if (end_date_dateform - start_date_dateform).days < 0:
         return False
+        
+    return True
+
+def valid_time(start_time,end_time):
+    """
+    Check if the user enter's a valid time
+    """
+    current_date = datetime.today()
+    start_date_dateform = datetime.strptime(start_date, '%m-%d-%Y')
+    end_date_dateform = datetime.strptime(end_date, '%m-%d-%Y')
+
+    if (end_date_dateform - start_date_dateform).days < 0:
+        return False
 
     if (current_date - start_date_dateform).days > 0:
         return False

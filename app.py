@@ -7,6 +7,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import apology, login_required, valid_date
 
+from datetime import datetime, date
+
 app = Flask(__name__)
 
 # Allows changes to show actively instead of restarting flask
@@ -122,6 +124,7 @@ def preferences():
 @login_required
 def create():
     """Create a new event"""
+    current_id = db.execute("SELECT MAX(id) AS id FROM events WHERE owner_id = ?", session["user_id"])[0].get("id")
     if request.method == "POST":
 
         title = request.form.get("title")
@@ -139,7 +142,6 @@ def create():
         db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
                 title, session["user_id"], start_date, end_date, description, location)
 
-        current_id = db.execute("SELECT MAX(id) AS id FROM events WHERE owner_id = ?", session["user_id"])[0].get("id")
         current_event = db.execute("SELECT * FROM events WHERE id = ?", current_id)[0]
         db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, session["user_id"], 0)
 
@@ -149,7 +151,7 @@ def create():
         return render_template("addinvitees.html", event=current_event, invitees=current_invitees)
 
     else:
-        return render_template("create.html", event=None)
+        return render_template("create.html", event=current_id, current_date = datetime.today().strftime('%Y-%m-%d'))
 
 @app.route("/addinvitees", methods=["POST"])
 @login_required
@@ -204,7 +206,8 @@ def edit():
     else:
         event_id = int(request.args.get("event_id"))
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)
-        return render_template("create.html", event=event[0])
+        return render_template("create.html", event=event[0], current_date = datetime.today().strftime('%Y-%m-%d'))
+
 
 @app.route("/delete_event")
 @login_required
@@ -218,9 +221,15 @@ def delete_event():
 @login_required
 def selecttimes():
     if request.method == "POST":
-        
-        datetime.datetime.now().astimezone().tzinfo
-        return apology("laksjf")
+        length = request.form.get("length")
+        start = request.form.get("start")
+        end = request.form.get("end")
+        event_id = request.form.get("event_id")
+
+        db.execute("UPDATE events SET length = ?, start_time = ?, end_time = ? WHERE id = ?", length, start, end, event_id)
+
+        events = db.execute("SELECT * FROM events WHERE id IN (SELECT event_id FROM attendees WHERE person_id = ?)", session["user_id"])
+        return render_template("index.html", events=events, user_id=session["user_id"])
     else:
         event_id = int(request.args.get("event_id"))
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
