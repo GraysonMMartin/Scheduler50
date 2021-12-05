@@ -26,7 +26,7 @@
             for (var j = 0; j < 7; j++) {
                 var td = document.createElement('TD');
                 td.setAttribute('class', 'bg-white')
-                td.setAttribute('value', 'available')
+                td.setAttribute('value', '1')
                 td.setAttribute('name', 'preferences')
                 td.setAttribute('onmousedown', 'updateAvailability(this)')
                 td.appendChild(document.createTextNode(timeSlots[i]));
@@ -37,12 +37,12 @@
     }
 
     function updateAvailability(cell) {
-        if (cell.getAttributeNode("value").value == "available"){
-            cell.getAttributeNode("value").value = "unavailable";
+        if (cell.getAttributeNode("value").value == "1"){
+            cell.getAttributeNode("value").value = "0";
             cell.getAttributeNode("class").value = "bg-red";
         }
         else{
-            cell.getAttributeNode("value").value = "available";
+            cell.getAttributeNode("value").value = "1";
             cell.getAttributeNode("class").value = "bg-white";
         }
     }

@@ -94,6 +94,13 @@ def login():
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
+        if(db.execute("SELECT COUNT(*) AS count FROM availability WHERE user_id = ?", session["user_id"])[0].get("count") == 0):
+            db.execute("INSERT INTO availability(user_id) VALUES(?)", session["user_id"])
+            for i in range(24):
+                for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+                    column_name = j+str(i)
+                    db.execute("UPDATE availability SET ? = 1 WHERE user_id = ?", column_name, session["user_id"])
+
         # Redirect user to home page
         return redirect("/")
 
@@ -229,6 +236,10 @@ def selecttimes():
 @app.route("/set_preferences", methods=["POST"])
 @login_required
 def set_preferences():
-    preferences = request.form.getlist('preferences[]')
-    print(preferences)
+    preferences = list(map(int, request.form.getlist('preferences[]')))
+    k = 0
+    for i in range(24):
+        for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+            db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", j+str(i), preferences[k], session["user_id"])
+            k += 1
     return redirect("/")
