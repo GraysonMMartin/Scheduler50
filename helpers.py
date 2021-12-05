@@ -28,6 +28,7 @@ def login_required(f):
 
     https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
     """
+    # Adapted from CS50 Finance problem set
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
@@ -39,14 +40,13 @@ def valid_date(start_date,end_date):
     """
     Check if the user enter's a valid date
     """
-    current_date = datetime.today()
+    # Note that in the html input I have made the minimum value as today's date
+    # Therefore I only need to check if the end date is before the start date
+
     start_date_dateform = datetime.strptime(start_date, '%m-%d-%Y')
     end_date_dateform = datetime.strptime(end_date, '%m-%d-%Y')
 
     if (end_date_dateform - start_date_dateform).days < 0:
-        return False
-
-    if (current_date - start_date_dateform).days > 0:
         return False
         
     return True

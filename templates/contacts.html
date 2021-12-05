@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Contacts
+{% endblock %}
+
+{% block main %}
+<h4>
+    {% for contact in contacts %}
+        {{ contact.username }} <br>
+    {% endfor %}
+</h4>
+{% endblock %}

@@ -15,15 +15,30 @@
     </form>
     <form action="/edit" method="post">
         <input name="event_id" type="hidden" value="{{ event.id }}">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="title" name="title" value="{{ event.title }}" type="text" required>
+        </div>
+        <div class="mb-3">
+            <input name="start_date" type="date"  value="{{ current_date }}" min="{{ current_date }}" required>
+            <input name="end_date" type="date" value="{{ current_date }}" min="{{ current_date }}" required>
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="description" name="description" value="{{ event.description }}" type="text" required>
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="location" name="location" value="{{ event.location }}" type="text" required>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Next</button>
+    </form>
     {% else %}
     <form action="/create" method="post">
-    {% endif %}
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="title" name="title" placeholder="Title" type="text" required>
         </div>
         <div class="mb-3">
-            <input name="start_date" type="date" required>
-            <input name="end_date" type="date" required>
+            <input name="start_date" type="date"  value="{{ current_date }}" min="{{ current_date }}" required>
+            <input name="end_date" type="date" value="{{ current_date }}" min="{{ current_date }}" required>
         </div>
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="description" name="description" placeholder="Description" type="text" required>
@@ -34,4 +49,6 @@
 
         <button class="btn btn-primary" type="submit">Next</button>
     </form>
+    {% endif %}
+        
 {% endblock %}
