@@ -133,8 +133,6 @@ def preferences():
 def create():
     """Create a new event"""
 
-    # Get the latest eventID
-    current_event = db.execute("SELECT * FROM events WHERE id = (SELECT MAX(id) AS id FROM events WHERE owner_id = ?)", session["user_id"][0].get("id"))
     if request.method == "POST":
         
         # Get the user input from the form
@@ -154,12 +152,18 @@ def create():
         db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
                 title, session["user_id"], start_date, end_date, description, location)
 
+        # Get the latest eventID
+        current_event = db.execute("SELECT * FROM events WHERE id = (SELECT MAX(id) AS id FROM events WHERE owner_id = ?)", session["user_id"])
+        print(current_event)
+        current_id = current_event[0].get("id")
+
         # Create a new attendenace entry into attendees (this is for the currrent user)
-        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_event.id, session["user_id"], 0)
+        db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, session["user_id"], 0)
 
         # Get the usernames of those who will attend
         current_invitees = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
                         current_id)
+        print(current_invitees)
 
         return render_template("addinvitees.html", event=current_event, invitees=current_invitees)
 
