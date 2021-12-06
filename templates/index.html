@@ -43,6 +43,10 @@
                         <input name="event_id" type="hidden" value="{{ event.id }}">
                         <input class="btn btn-primary" type="submit" value="Edit">
                     </form>
+                    <form action="/view_responses">
+                      <input name="event_id" type="hidden" value="{{ event.id }}">
+                        <input class="btn btn-primary" type="submit" value="Responses">
+                    </form>
                     {% endif %}
                 </td>
                 <td>

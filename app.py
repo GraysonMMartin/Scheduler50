@@ -128,14 +128,14 @@ def logout():
     # Redirect user to login form
     return redirect("/login")
 
-@app.route("/preferences", methods=["GET", "POST"])
+@app.route("/preferences")
 @login_required
 def preferences():
     """Allows the user to enter times at which they are not available"""
-    if request.method == "POST":
-        return apology("d")
-    else:
-        return render_template("preferences.html")
+
+    availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
+    preferences = list(availability.values())[1:]
+    return render_template("preferences.html", preferences=preferences)
 
 @app.route("/create", methods=["GET", "POST"])
 @login_required
@@ -161,7 +161,6 @@ def create():
 
         # Get the latest eventID
         current_event = db.execute("SELECT * FROM events WHERE id = (SELECT MAX(id) AS id FROM events WHERE owner_id = ?)", session["user_id"])
-        print(current_event)
         current_id = current_event[0].get("id")
 
         # Create a new attendenace entry into attendees (this is for the currrent user)
@@ -170,9 +169,8 @@ def create():
         # Get the usernames of those who will attend
         current_invitees = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
                         current_id)
-        print(current_invitees)
 
-        return render_template("addinvitees.html", event=current_event, invitees=current_invitees)
+        return render_template("addinvitees.html", event=current_event[0], invitees=current_invitees)
 
     else:
         return render_template("create.html", event = None, current_date = datetime.today().strftime('%Y-%m-%d'))
@@ -272,14 +270,23 @@ def selecttimes():
         event_id = request.form.get("event_id")
 
         # TODO
-        db.execute("UPDATE events SET length = ?, start_time = ?, end_time = ? WHERE id = ?", length, start, end, event_id)
+        db.execute("UPDATE events SET length = ?, start_date = ?, end_date = ? WHERE id = ?", length, start, end, event_id)
 
         events = db.execute("SELECT * FROM events WHERE id IN (SELECT event_id FROM attendees WHERE person_id = ?)", session["user_id"])
         return render_template("index.html", events=events, user_id=session["user_id"])
     else:
-        event_id = int(request.args.get("event_id"))
+        event_id = request.args.get("event_id")
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
         return render_template("selecttimes.html", event=event)
+
+@app.route("/view_responses")
+@login_required
+def view_responses():
+    event_id = int(request.args.get("event_id"))
+    title = db.execute("SELECT title FROM events WHERE id = ?", event_id)[0].get("title")
+    total = db.execute("SELECT COUNT(*) AS total FROM attendees WHERE event_id = ?", event_id)[0].get("total")
+    responded = db.execute("SELECT COUNT(*) AS responded FROM attendees WHERE event_id = ? and responded = 1", event_id)[0].get("responded")
+    return render_template("responses.html", title=title, total=total, responded=responded)
 
 @app.route("/set_preferences", methods=["POST"])
 @login_required
