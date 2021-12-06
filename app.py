@@ -31,8 +31,12 @@ def after_request(response):
 @login_required
 def home():
     """The home page which shows all of the user's events"""
-    
-    filter = request.args.get("filter")
+   
+    try:
+        filter = request.args["filter"]
+    except:
+        filter = "future"
+   
     if not filter:
         filter = "future"
 
@@ -40,7 +44,7 @@ def home():
         events = db.execute("SELECT * FROM events WHERE start_date >= ? AND id IN (SELECT event_id FROM attendees WHERE person_id = ?)", datetime.today().strftime('%Y-%m-%d') ,session["user_id"])
     else:
         events = db.execute("SELECT * FROM events WHERE start_date < ? AND id IN (SELECT event_id FROM attendees WHERE person_id = ?)", datetime.today().strftime('%Y-%m-%d') ,session["user_id"])
-    
+   
     return render_template("index.html", events=events, user_id=session["user_id"])
 
 @app.route("/register", methods=["GET", "POST"])
@@ -150,14 +154,18 @@ def create():
         end = request.form.get("end_date")
         description = request.form.get("description")
         location = request.form.get("location")
+        length = request.form.get("duration")
+
+        if end == None:
+            end = datetime.today().strftime('%Y-%m-%d')
 
         #Check that the date is valid
         if not valid_date(start,end):
           return apology("Please enter a valid date", 403)
 
         # Insert the new event into the database
-        db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
-                title, session["user_id"], start, end, description, location)
+        db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location, length) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                title, session["user_id"], start, end, description, location, length)
 
         # Get the latest eventID
         current_event = db.execute("SELECT * FROM events WHERE id = (SELECT MAX(id) AS id FROM events WHERE owner_id = ?)", session["user_id"])
@@ -230,12 +238,15 @@ def edit():
         location = request.form.get("location")
         event_id = request.form.get("event_id")
 
+        if end == None:
+            end = datetime.today().strftime('%Y-%m-%d')
+
         # Check that the date is valid
         if not valid_date(start,end):
           return apology("Please enter a valid date", 403)
 
         # Update the values
-        db.execute("UPDATE events SET title = ?, start_date = ?, end_date = ? description = ?, location = ? WHERE id = ?",
+        db.execute("UPDATE events SET title = ?, start_date = ?, end_date = ?, description = ?, location = ? WHERE id = ?",
                 title, start, end, description, location, event_id)
 
         return redirect("/")
