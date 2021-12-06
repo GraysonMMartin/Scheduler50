@@ -144,14 +144,15 @@ def create():
         end_date = end[5:8] + end[8:] + "-" + end[:4]
         description = request.form.get("description")
         location = request.form.get("location")
+        length = requst.form.get("duration")
 
         #Check that the date is valid
         if not valid_date(start_date,end_date):
           return apology("Please enter a valid date", 403)
 
         # Insert the new event into the database
-        db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
-                title, session["user_id"], start_date, end_date, description, location)
+        db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location, length) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                title, session["user_id"], start_date, end_date, description, location, length)
 
         # Get the latest eventID
         current_event = db.execute("SELECT * FROM events WHERE id = (SELECT MAX(id) AS id FROM events WHERE owner_id = ?)", session["user_id"])
@@ -274,6 +275,15 @@ def selecttimes():
         event_id = int(request.args.get("event_id"))
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
         return render_template("selecttimes.html", event=event)
+
+@app.route("/view_responses")
+@login_required
+def view_responses():
+    event_id = int(request.args.get("event_id"))
+    title = db.execute("SELECT title FROM events WHERE id = ?", event_id)[0].get("title")
+    total = db.execute("SELECT COUNT(*) AS total FROM attendees WHERE event_id = ?", event_id)[0].get("total")
+    responded = db.execute("SELECT COUNT(*) AS responded FROM attendees WHERE event_id = ? and responded = 1", event_id)[0].get("responded")
+    return render_template("responses.html", title=title, total=total, responded=responded)
 
 @app.route("/set_preferences", methods=["POST"])
 @login_required
