@@ -6,25 +6,17 @@
 
 {% block main %}
 
-<script>
-  function filtered(value) {
-    document.getElementById("filter").value = value;
-  }
-</script>
-
-<div class = "filtered">
-  <form action="/">
-    <input id="filter" type="hidden" value="past">
-    <input class="btn btn-primary" type="submit" value="past" id="past">
-  </form>
-</div>
-
-<div class = "filtered">
-  <form action="/">
-    <input id="filter" type="hidden" value="future">
-    <input class="btn btn-primary" type="submit" value="future" id="future">
-  </form>
-</div>
+<form action="/">
+  <div class="form-check form-check-inline" id="filtButtons">
+    <input class= "form-check-input" type="radio" name="options" id="option1" value="past"> Past <br>
+  </div>
+  <div class="form-check form-check-inline" id="filtButtons">
+      <input class= "form-check-input" type="radio" name="options" id="option2" value="future"> Future <br>
+  </div>
+  <div class="form-check form-check-inline" id="filtButtons">
+    <input class="btn btn-primary" type="submit" value="Filter">
+  </div>
+</form>
 
 <table class="table">
     <thead>

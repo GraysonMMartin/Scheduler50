@@ -32,9 +32,7 @@ def after_request(response):
 def home():
     """The home page which shows all of the user's events"""
     
-    filter = request.args.get("filter")
-    if not filter:
-        filter = "future"
+    filter=request.args["options"]     
 
     if filter == "future":
         events = db.execute("SELECT * FROM events WHERE start_date >= ? AND id IN (SELECT event_id FROM attendees WHERE person_id = ?)", datetime.today().strftime('%Y-%m-%d') ,session["user_id"])
