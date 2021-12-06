@@ -29,7 +29,7 @@ td.bg-white {
 }
 
 /* Align the filter buttons */
-.filter {
+.filtered {
     float: right;
     margin-left:10px;
 }

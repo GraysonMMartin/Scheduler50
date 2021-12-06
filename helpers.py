@@ -43,8 +43,8 @@ def valid_date(start_date,end_date):
     # Note that in the html input I have made the minimum value as today's date
     # Therefore I only need to check if the end date is before the start date
 
-    start_date_dateform = datetime.strptime(start_date, '%m-%d-%Y')
-    end_date_dateform = datetime.strptime(end_date, '%m-%d-%Y')
+    start_date_dateform = datetime.strptime(start_date, '%Y-%m-%d')
+    end_date_dateform = datetime.strptime(end_date, '%Y-%m-%d')
 
     if (end_date_dateform - start_date_dateform).days < 0:
         return False
