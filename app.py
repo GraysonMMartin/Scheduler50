@@ -31,8 +31,12 @@ def after_request(response):
 @login_required
 def home():
     """The home page which shows all of the user's events"""
-    
-    filter = request.args.get("filter")
+   
+    try:
+        filter = request.args["filter"]
+    except:
+        filter = "future"
+   
     if not filter:
         filter = "future"
 
@@ -40,7 +44,7 @@ def home():
         events = db.execute("SELECT * FROM events WHERE start_date >= ? AND id IN (SELECT event_id FROM attendees WHERE person_id = ?)", datetime.today().strftime('%Y-%m-%d') ,session["user_id"])
     else:
         events = db.execute("SELECT * FROM events WHERE start_date < ? AND id IN (SELECT event_id FROM attendees WHERE person_id = ?)", datetime.today().strftime('%Y-%m-%d') ,session["user_id"])
-    
+   
     return render_template("index.html", events=events, user_id=session["user_id"])
 
 @app.route("/register", methods=["GET", "POST"])
@@ -151,6 +155,9 @@ def create():
         description = request.form.get("description")
         location = request.form.get("location")
         length = request.form.get("duration")
+
+        if end == None:
+            end = datetime.today().strftime('%Y-%m-%d')
 
         #Check that the date is valid
         if not valid_date(start,end):
