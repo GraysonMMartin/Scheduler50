@@ -5,6 +5,27 @@
 {% endblock %}
 
 {% block main %}
+
+<script>
+  function filtered(value) {
+    document.getElementById("filter").value = value;
+  }
+</script>
+
+<div class = "filtered">
+  <form action="/">
+    <input id="filter" type="hidden" value="past">
+    <input class="btn btn-primary" type="submit" value="past" id="past">
+  </form>
+</div>
+
+<div class = "filtered">
+  <form action="/">
+    <input id="filter" type="hidden" value="future">
+    <input class="btn btn-primary" type="submit" value="future" id="future">
+  </form>
+</div>
+
 <table class="table">
     <thead>
       <tr>

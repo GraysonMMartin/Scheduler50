@@ -4,17 +4,15 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-
-from helpers import apology, login_required
-
-import datetime
-LOCAL_TIMEZONE = datetime.datetime.now().astimezone().tzinfo
+from helpers import apology, login_required, valid_date
+from datetime import datetime, date
 
 app = Flask(__name__)
 
 # Allows changes to show actively instead of restarting flask
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
+# Connect the database to the project
 db = SQL("sqlite:///scheduler50.db")
 
 app.config["SESSION_PERMANENT"] = False
@@ -32,7 +30,17 @@ def after_request(response):
 @app.route("/")
 @login_required
 def home():
-    events = db.execute("SELECT * FROM events WHERE id IN (SELECT event_id FROM attendees WHERE person_id = ?)", session["user_id"])
+    """The home page which shows all of the user's events"""
+    
+    filter = request.args.get("filter")
+    if not filter:
+        filter = "future"
+
+    if filter == "future":
+        events = db.execute("SELECT * FROM events WHERE start_date >= ? AND id IN (SELECT event_id FROM attendees WHERE person_id = ?)", datetime.today().strftime('%Y-%m-%d') ,session["user_id"])
+    else:
+        events = db.execute("SELECT * FROM events WHERE start_date < ? AND id IN (SELECT event_id FROM attendees WHERE person_id = ?)", datetime.today().strftime('%Y-%m-%d') ,session["user_id"])
+    
     return render_template("index.html", events=events, user_id=session["user_id"])
 
 @app.route("/register", methods=["GET", "POST"])
@@ -97,6 +105,13 @@ def login():
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
+        if(db.execute("SELECT COUNT(*) AS count FROM availability WHERE user_id = ?", session["user_id"])[0].get("count") == 0):
+            db.execute("INSERT INTO availability(user_id) VALUES(?)", session["user_id"])
+            for i in range(24):
+                for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+                    column_name = j+str(i)
+                    db.execute("UPDATE availability SET ? = 1 WHERE user_id = ?", column_name, session["user_id"])
+
         # Redirect user to home page
         return redirect("/")
 
@@ -116,6 +131,7 @@ def logout():
 @app.route("/preferences", methods=["GET", "POST"])
 @login_required
 def preferences():
+    """Allows the user to enter times at which they are not available"""
     if request.method == "POST":
         return apology("d")
     else:
@@ -125,41 +141,59 @@ def preferences():
 @login_required
 def create():
     """Create a new event"""
-    if request.method == "POST":
 
+    if request.method == "POST":
+        
+        # Get the user input from the form
         title = request.form.get("title")
         start = request.form.get("start_date")
-        start_date = start[5:8] + start[8:] + "-" + start[:4]
         end = request.form.get("end_date")
-        end_date = end[5:8] + end[8:] + "-" + end[:4]
         description = request.form.get("description")
         location = request.form.get("location")
 
-        db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
-                title, session["user_id"], start_date, end_date, description, location)
+        #Check that the date is valid
+        if not valid_date(start,end):
+          return apology("Please enter a valid date", 403)
 
-        current_id = db.execute("SELECT MAX(id) AS id FROM events WHERE owner_id = ?", session["user_id"])[0].get("id")
-        current_event = db.execute("SELECT * FROM events WHERE id = ?", current_id)[0]
+        # Insert the new event into the database
+        db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
+                title, session["user_id"], start, end, description, location)
+
+        # Get the latest eventID
+        current_event = db.execute("SELECT * FROM events WHERE id = (SELECT MAX(id) AS id FROM events WHERE owner_id = ?)", session["user_id"])
+        print(current_event)
+        current_id = current_event[0].get("id")
+
+        # Create a new attendenace entry into attendees (this is for the currrent user)
         db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, session["user_id"], 0)
 
+        # Get the usernames of those who will attend
         current_invitees = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
                         current_id)
+        print(current_invitees)
 
         return render_template("addinvitees.html", event=current_event, invitees=current_invitees)
 
     else:
-        return render_template("create.html", event=None)
+        return render_template("create.html", event = None, current_date = datetime.today().strftime('%Y-%m-%d'))
 
 @app.route("/addinvitees", methods=["POST"])
 @login_required
 def addinvitees():
+    """Invites other users"""
+
     if request.method == "POST":
+
+        # Get the id's of all current users
         guest = db.execute("SELECT id FROM users WHERE username = ?", request.form.get("invitee"))
         if not guest:
             return apology("That username does not exist")
+
         guest_id = guest[0].get("id")
         current_id = int(request.form.get("event_id"))
         current_event = db.execute("SELECT * FROM events WHERE id = ?", current_id)[0]
+
+        # Create a new attendenace entry into attendees (this is for the guests)
         db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, guest_id, 0)
         current_invitees = db.execute("SELECT * FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
                         current_id)
@@ -169,10 +203,17 @@ def addinvitees():
 @app.route("/removeinvitee", methods=["POST"])
 @login_required
 def removeinvitee():
+    """Remove other users from an invited event"""
+
     if request.method == "POST":
+        # Get the guest's IDs
         guest_id = db.execute("SELECT id FROM users WHERE username = ?", request.form.get("invitee"))[0].get("id")
         current_id = int(request.form.get("event_id"))
+
+        # Delete the guests
         db.execute("DELETE FROM attendees WHERE event_id = ? AND person_id = ?", current_id, guest_id)
+
+        # Get the latest events data to be displayed
         current_event = db.execute("SELECT * FROM events WHERE id = ?", current_id)[0]
         current_invitees = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
                         current_id)
@@ -181,30 +222,40 @@ def removeinvitee():
 @app.route("/edit", methods=["GET", "POST"])
 @login_required
 def edit():
+    """Edit the details of an event"""
     if request.method == "POST":
-        #update event table with new info
+        # Get the new information from the form
         title = request.form.get("title")
         start = request.form.get("start_date")
-        start_date = start[5:8] + start[8:] + "-" + start[:4]
         end = request.form.get("end_date")
-        end_date = end[5:8] + end[8:] + "-" + end[:4]
         description = request.form.get("description")
         location = request.form.get("location")
         event_id = request.form.get("event_id")
 
-        db.execute("UPDATE events SET title = ?, start_date = ?, end_date = ?, description = ?, location = ? WHERE id = ?",
-                title, start_date, end_date, description, location, event_id)
-        # update ateendees
+        # Check that the date is valid
+        if not valid_date(start,end):
+          return apology("Please enter a valid date", 403)
+
+        # Update the values
+        db.execute("UPDATE events SET title = ?, start_date = ?, end_date = ? description = ?, location = ? WHERE id = ?",
+                title, start, end, description, location, event_id)
+
         return redirect("/")
     else:
+        # Get the information of the desired event to populate the fields
         event_id = int(request.args.get("event_id"))
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)
-        return render_template("create.html", event=event[0])
+        return render_template("create.html", event=event[0], current_date = datetime.today().strftime('%Y-%m-%d'))
+
 
 @app.route("/delete_event")
 @login_required
 def delete_event():
+    """Delete an event"""
+    # Get the current event id
     event_id = int(request.args.get("event_id"))
+
+    # Delete the event from attendees and events
     db.execute("DELETE FROM attendees WHERE event_id = ?", event_id)
     db.execute("DELETE FROM events WHERE id = ?", event_id)
     return redirect("/")
@@ -212,11 +263,38 @@ def delete_event():
 @app.route("/selecttimes", methods=["GET", "POST"])
 @login_required
 def selecttimes():
+    """Select possible times for a user to have a meeting"""
     if request.method == "POST":
-        
-        datetime.datetime.now().astimezone().tzinfo
-        return apology("laksjf")
+        # Get the information from the form
+        length = request.form.get("length")
+        start = request.form.get("start")
+        end = request.form.get("end")
+        event_id = request.form.get("event_id")
+
+        # TODO
+        db.execute("UPDATE events SET length = ?, start_time = ?, end_time = ? WHERE id = ?", length, start, end, event_id)
+
+        events = db.execute("SELECT * FROM events WHERE id IN (SELECT event_id FROM attendees WHERE person_id = ?)", session["user_id"])
+        return render_template("index.html", events=events, user_id=session["user_id"])
     else:
         event_id = int(request.args.get("event_id"))
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
         return render_template("selecttimes.html", event=event)
+
+@app.route("/set_preferences", methods=["POST"])
+@login_required
+def set_preferences():
+    preferences = list(map(int, request.form.getlist('preferences[]')))
+    k = 0
+    for i in range(24):
+        for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+            db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", j+str(i), preferences[k], session["user_id"])
+            k += 1
+    return redirect("/")
+
+@app.route("/contacts", methods=["GET"])
+@login_required
+def contacts():
+    """Display's usernames of users who have had a meeting with the current user"""
+    contacts = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees,events WHERE event_id = id AND person_id != ?)", session["user_id"])
+    return render_template("contacts.html", contacts=contacts, user_id=session["user_id"])

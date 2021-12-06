@@ -27,3 +27,9 @@ td.bg-white {
     -o-user-select: none;
     user-select: none;
 }
+
+/* Align the filter buttons */
+.filtered {
+    float: right;
+    margin-left:10px;
+}
