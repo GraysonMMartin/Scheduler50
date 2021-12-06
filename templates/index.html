@@ -29,7 +29,7 @@
 <table class="table">
     <thead>
       <tr>
-        <th>Edit</th>
+        <th>Edit/View</th>
         <th>Title</th>
         <th>Date Range</th>
       </tr>
@@ -39,9 +39,17 @@
             <tr>
                 <td>
                     {% if event.owner_id == user_id %}
-                    <form action="/edit">
+                      <form action="/edit">
+                          <input name="event_id" type="hidden" value="{{ event.id }}">
+                          <input class="btn btn-primary" type="submit" value="Edit">
+                      </form>
+                      <form action="/view_responses">
                         <input name="event_id" type="hidden" value="{{ event.id }}">
                         <input class="btn btn-primary" type="submit" value="Edit">
+                    </form>
+                    <form action="/view_responses">
+                      <input name="event_id" type="hidden" value="{{ event.id }}">
+                        <input class="btn btn-primary" type="submit" value="Responses">
                     </form>
                     {% endif %}
                 </td>
