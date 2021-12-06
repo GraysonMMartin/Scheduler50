@@ -5,6 +5,29 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+
+    Date.prototype.addDays = function(days) {
+        var date = new Date(this.valueOf());
+        date.setDate(date.getDate() + days);
+        return date;
+    }
+
+    function setEndMax() {
+        var end = document.getElementById("end_date");
+        var date = document.getElementById("start_date").value;
+        end.setAttribute("min", date);
+        var year = date.substring(0,4);
+        var month = date.substring(5,7);
+        var day = date.substring(8,10);
+
+        var start = new Date(year, month-1, day);
+        var end_date = start.addDays(6);
+        end.setAttribute("max",end_date.toISOString().split('T')[0]);
+        end.disabled = false;
+    }
+
+</script>
 {% endblock %}
 
 {% block main %}
@@ -19,8 +42,8 @@
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="title" name="title" value="{{ event.title }}" type="text" required>
         </div>
         <div class="mb-3">
-            <input name="start_date" type="date"  value="{{ current_date }}" min="{{ current_date }}" required>
-            <input name="end_date" type="date" value="{{ current_date }}" min="{{ current_date }}" required>
+            <input name="start_date" id="start_date" type="date"  value="{{ current_date }}" min="{{ current_date }}" onchange="setEndMax()" required>
+            <input name="end_date" id="end_date" type="date" value="{{ current_date }}" min="{{ current_date }}" required disabled>
         </div>
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="description" name="description" value="{{ event.description }}" type="text" required>
@@ -37,8 +60,8 @@
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="title" name="title" placeholder="Title" type="text" required>
         </div>
         <div class="mb-3">
-            <input name="start_date" type="date"  value="{{ current_date }}" min="{{ current_date }}" required>
-            <input name="end_date" type="date" value="{{ current_date }}" min="{{ current_date }}" required>
+            <input name="start_date" id="start_date" type="date"  value="{{ current_date }}" min="{{ current_date }}" onchange="setEndMax()" required>
+            <input name="end_date" id="end_date" type="date" value="{{ current_date }}" min="{{ current_date }}" required disabled>
         </div>
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="description" name="description" placeholder="Description" type="text" required>

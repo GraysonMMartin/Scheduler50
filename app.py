@@ -235,7 +235,7 @@ def edit():
           return apology("Please enter a valid date", 403)
 
         # Update the values
-        db.execute("UPDATE events SET title = ?, start_date = ?, end_date = ? description = ?, location = ? WHERE id = ?",
+        db.execute("UPDATE events SET title = ?, start_date = ?, end_date = ?, description = ?, location = ? WHERE id = ?",
                 title, start, end, description, location, event_id)
 
         return redirect("/")
