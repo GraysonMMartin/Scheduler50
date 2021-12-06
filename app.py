@@ -32,7 +32,8 @@ def after_request(response):
 def home():
     """The home page which shows all of the user's events"""
     
-    filter = request.args.get("filter")
+    filter = request.args["filter"]
+    
     if not filter:
         filter = "future"
 
