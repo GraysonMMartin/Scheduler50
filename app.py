@@ -150,14 +150,15 @@ def create():
         end = request.form.get("end_date")
         description = request.form.get("description")
         location = request.form.get("location")
+        length = request.form.get("duration")
 
         #Check that the date is valid
         if not valid_date(start,end):
           return apology("Please enter a valid date", 403)
 
         # Insert the new event into the database
-        db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location) VALUES (?, ?, ?, ?, ?, ?)",
-                title, session["user_id"], start, end, description, location)
+        db.execute("INSERT INTO events(title, owner_id, start_date, end_date, description, location, length) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                title, session["user_id"], start, end, description, location, length)
 
         # Get the latest eventID
         current_event = db.execute("SELECT * FROM events WHERE id = (SELECT MAX(id) AS id FROM events WHERE owner_id = ?)", session["user_id"])
@@ -229,6 +230,9 @@ def edit():
         description = request.form.get("description")
         location = request.form.get("location")
         event_id = request.form.get("event_id")
+
+        if end == None:
+            end = datetime.today().strftime('%Y-%m-%d')
 
         # Check that the date is valid
         if not valid_date(start,end):
