@@ -6,6 +6,7 @@ from werkzeug.exceptions import default_exceptions, HTTPException, InternalServe
 from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import apology, login_required, valid_date
 from datetime import datetime, date
+import json
 
 app = Flask(__name__)
 
@@ -119,14 +120,14 @@ def logout():
     # Redirect user to login form
     return redirect("/login")
 
-@app.route("/preferences", methods=["GET", "POST"])
+@app.route("/preferences")
 @login_required
 def preferences():
     """Allows the user to enter times at which they are not available"""
-    if request.method == "POST":
-        return apology("d")
-    else:
-        return render_template("preferences.html")
+
+    availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
+    preferences = list(availability.values())[1:]
+    return render_template("preferences.html", preferences=preferences)
 
 @app.route("/create", methods=["GET", "POST"])
 @login_required
