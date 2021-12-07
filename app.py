@@ -5,7 +5,10 @@ from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import apology, login_required, valid_date, all_dates
-from datetime import datetime, date
+from datetime import datetime, time, timedelta
+import time
+import pytz
+from collections import deque 
 
 app = Flask(__name__)
 
@@ -18,6 +21,9 @@ db = SQL("sqlite:///scheduler50.db")
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+# Time zone differences
+TIME_DIFF = ((datetime.now(pytz.timezone(time.tzname[0])) - datetime.now(pytz.timezone("UTC")) ).total_seconds())/60/60
 
 @app.after_request
 def after_request(response):
@@ -290,10 +296,19 @@ def selecttimes():
         end = event.get("end_date")
         duration = event.get("length")
         dates = all_dates(start, end)
+
+        # Change from UTC time to local time
         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
         preferences = list(availability.values())[1:]
 
-        return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences, length=duration)
+        # https://www.kite.com/python/answers/how-to-shift-elements-in-a-list-in-python
+        moved_up = deque([1, 2, 3, 4, 5])
+
+        #Shift `a_list` 2 places to the right
+        moved_up.rotate(TIME_DIFF)
+        preferences = list(moved_up)
+
+        return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
 
 @app.route("/view_responses")
 @login_required
@@ -309,10 +324,27 @@ def view_responses():
 def set_preferences():
     preferences = list(map(int, request.form.getlist('preferences[]')))
     k = 0
-    for i in range(24):
-        for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
-            db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", j+str(i), preferences[k], session["user_id"])
+    days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] 
+
+    # Store the availability of a user
+    for i in range(TIME_DIFF, 24 + TIME_DIFF):
+        for j in range(0,len(days)):
+            if i < 0:
+                if j == 0:
+                    db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[6]+str(i+24), preferences[k], session["user_id"])
+                else:
+                     db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[j]+str(i+24), preferences[k], session["user_id"])
+
+            elif i > 24:
+                if j == 6:
+                    db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[0]+str(i-24), preferences[k], session["user_id"])
+                else:
+                     db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[j]+str(i-24), preferences[k], session["user_id"])
+
+            else:
+                db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[j]+str(i), preferences[k], session["user_id"])
             k += 1
+
     return redirect("/")
 
 @app.route("/contacts", methods=["GET"])
