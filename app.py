@@ -8,6 +8,10 @@ from helpers import apology, login_required, valid_date, all_dates
 from datetime import datetime, time, timedelta
 import time
 import pytz
+<<<<<<< HEAD
+=======
+from collections import deque 
+>>>>>>> b02f25f0b637ead1f886c01a12545082db912e6f
 
 app = Flask(__name__)
 
@@ -22,7 +26,11 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Time zone differences
+<<<<<<< HEAD
 TIME_DIFF = int(round(((datetime.now(pytz.timezone(time.tzname[0])) - datetime.now(pytz.timezone("UTC")) ).total_seconds())/60/60))
+=======
+TIME_DIFF = ((datetime.now(pytz.timezone(time.tzname[0])) - datetime.now(pytz.timezone("UTC")) ).total_seconds())/60/60
+>>>>>>> b02f25f0b637ead1f886c01a12545082db912e6f
 
 @app.after_request
 def after_request(response):
@@ -338,6 +346,7 @@ def set_preferences():
             else:
                 db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[j]+str(i), preferences[k], session["user_id"])
             k += 1
+
     return redirect("/")
 
 @app.route("/contacts", methods=["GET"])

@@ -1,3 +1,31 @@
+<<<<<<< HEAD
+{% extends "layout.html" %}
+
+{% block title %}
+    Select Times
+{% endblock %}
+
+{% block main %}
+    <h2>Select times you are available for: {{ event.title }}</h2>
+
+    <form action="/selecttimes" method="post">
+        <div class="mb-3">
+
+            <label for="length">How long is the meeting?</label>
+            <input type="number" id="length" name="length" placeholder="minutes" min=0 max=720 required>
+
+            <label for="start">When are you free (start)?</label>
+            <input type="time" id="time" name="start" min="00:00" max="24:00" required>
+
+            <label for="end">When are you free (end)?</label>
+            <input type="time" id="time" name="end" min="00:00" max="24:00" required>
+
+            <button class="btn btn-primary" type="submit">submit</button>
+        </div>
+    </form>
+    <h6>Note: That by default the first meeting time we suggest will start (if possible) at the time at which you are first free</h6>
+    <h6>We also will take care of the time difference!</h6>
+=======
 {% extends "layout.html" %}
 
 {% block title %}
@@ -140,4 +168,23 @@
         });
     </script>
 
+<<<<<<< HEAD
+=======
+    <form action="/selecttimes" method="post">
+        <div class="mb-3">
+            <table class="table" id="availabilityTable">
+                <thead>
+                    {% for date in dates %}
+                        <th>{{ date }}</th>
+                    {% endfor %}
+                </thead>
+                <script>addTable("{{ dates|length }}", "{{ preferences|safe }}");</script>
+            </table>
+        </div>
+        <div class="mb-3">
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+    </form>
+>>>>>>> 3de81242dd4619f7208b5b9de16250439b04b2b1
+>>>>>>> b02f25f0b637ead1f886c01a12545082db912e6f
 {% endblock %}

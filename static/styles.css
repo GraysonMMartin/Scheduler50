@@ -32,8 +32,8 @@ td.bg-green {
     user-select: none;
 }
 
-/* Align the filter buttons */
-.filtered {
-    float: right;
-    margin-left:10px;
+/* Align the filter options */
+#filtButtons {
+    float: left;
+    margin-left:20px;
 }
