@@ -298,7 +298,8 @@ def selecttimes():
 
         # Change from UTC time to local time
         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
-        preferences = list(deque(list(availability.values())[1:]).rotate(TIME_DIFF))
+        # preferences = list(deque(list(availability.values())[1:]).rotate(TIME_DIFF))
+        preferences = list(availability.values())[1:]
         return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
 
 @app.route("/view_responses")
