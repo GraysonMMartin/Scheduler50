@@ -44,12 +44,9 @@
         var firstDay = dayNames.indexOf(dayNames[start.getDay()]);
         var lastDay = dayNames.indexOf(dayNames[end.getDay()]);
 
-        // if (lastDay < firstDay){
-        //     lastDay += 7;
-        // }
-
         var k = firstDay;
         var day = 0;
+        var index = k;
 
         for (var i = 0; i < 24; i++) {
     
@@ -57,24 +54,22 @@
             tableBody.appendChild(tr);
 
             for (var j = 0; j < 7; j++) {
-                
-                // if (k < firstDay && k > lastDay) {
-                //     firstDay += 7;
-                //     k = firstDay;
-                //     lastDay += 7;
-                // }
 
+                index = k;
+                if (k % 7 < firstDay){
+                    index -= 7;
+                }
                 day = k % 7;
                 if ((firstDay <= lastDay && day >= firstDay && day <= lastDay) || (firstDay > lastDay && (day >= firstDay || day <= lastDay))) {
                     var td = document.createElement('TD');
-                    if (preferences[k] == 1) {
+                    if (preferences[index] == 1) {
                         td.setAttribute('class', 'bg-white');
                         td.setAttribute('onclick', 'updateAvailability(this)');
                     }
                     else {
                         td.setAttribute('class', 'bg-red');
                     }
-                    if (k > 167) {
+                    if (index > 167) {
                         td.setAttribute('class', 'bg-green')
                     }
                     td.setAttribute('value', '0');
