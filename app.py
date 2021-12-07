@@ -301,14 +301,6 @@ def selecttimes():
         # Change from UTC time to local time
         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
         preferences = list(availability.values())[1:]
-
-        # https://www.kite.com/python/answers/how-to-shift-elements-in-a-list-in-python
-        moved_up = deque([1, 2, 3, 4, 5])
-
-        #Shift `a_list` 2 places to the right
-        moved_up.rotate(TIME_DIFF)
-        preferences = list(moved_up)
-
         return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
 
 @app.route("/view_responses")
