@@ -14,6 +14,7 @@
     }
 
     function setEndMax() {
+        // sets the end date input to have a maximum value of 6 days after the first day
         var end = document.getElementById("end_date");
         var date = document.getElementById("start_date").value;
         end.setAttribute("min", date);

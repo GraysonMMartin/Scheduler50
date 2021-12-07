@@ -13,16 +13,20 @@
                         , "9 PM - 10 PM", "10 PM - 11 PM", "11 PM - 12 AM"]
 
     function addTable(dates, responses) {
+        // add table body showing the number of users available at each time
+
         var availabilityTable = document.getElementById("availabilityTable");
 
         var tableBody = document.createElement('TBODY');
         tableBody.className = "unhighlightable";
         availabilityTable.appendChild(tableBody);
 
+        // get array of responses
         responses = responses.replace('[', '');
         responses = responses.replace(']', '');
         responses = responses.split(", ");
 
+        // get array of dates of the event
         dates = dates.replace('[','');
         dates = dates.replace(']','');
         let singleQuotes = new RegExp(/\'/g)
@@ -62,10 +66,13 @@
 
                 index = k;
                 if (k % 7 < firstDay){
+                    // go backwards in the availability array if the value of first day is greater than the value of last day initially
+                    // e.g. event from Thu (4) to a Tue (2)
                     index -= 7;
                 }
                 day = k % 7;
                 if ((firstDay <= lastDay && day >= firstDay && day <= lastDay) || (firstDay > lastDay && (day >= firstDay || day <= lastDay))) {
+                    // if this day is part of the event, add a cell with the response info
                     var td = document.createElement('TD');
                     td.appendChild(document.createTextNode(String(responses[index]+"/"+"{{ responded }}")));
                     tr.appendChild(td);

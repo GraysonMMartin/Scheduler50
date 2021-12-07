@@ -332,6 +332,7 @@ def view_responses():
     title = event.get("title")
     total = db.execute("SELECT COUNT(*) AS total FROM attendees WHERE event_id = ?", event_id)[0].get("total")
     responded = db.execute("SELECT COUNT(*) AS responded FROM attendees WHERE event_id = ? and responded = 1", event_id)[0].get("responded")
+    # create a list with the sum of the availability of each day
     num_available = []
     for i in range(24):
         for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:

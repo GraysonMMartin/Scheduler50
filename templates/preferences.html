@@ -8,6 +8,7 @@
 <script>
 
     function addTable(preferences) {
+        // adds the table body
         var preferencesTable = document.getElementById("preferencesTable");
 
         var tableBody = document.createElement('TBODY');
@@ -20,6 +21,7 @@
                         , "9 PM - 10 PM", "10 PM - 11 PM", "11 PM - 12 AM"]
 
         var k = 0;
+        // make array with current preferences
         preferences = preferences.replace('[', '')
         preferences = preferences.replace(']', '')
         preferences = preferences.split(", ")
@@ -29,6 +31,7 @@
 
             for (var j = 0; j < 7; j++) {
                 var td = document.createElement('TD');
+                // reflect current preferences in the table upon creation
                 if (preferences[k] == 1) {
                     td.setAttribute('class', 'bg-white');
                     td.setAttribute('value', '1');
@@ -39,6 +42,7 @@
                 }
                 k++;
                 td.setAttribute('name', 'preferences');
+                // each cell calls updateAvailability when clicked
                 td.setAttribute('onclick', 'updateAvailability(this)');
                 td.appendChild(document.createTextNode(timeSlots[i]));
                 tr.appendChild(td);
@@ -48,6 +52,7 @@
     }
 
     function updateAvailability(cell) {
+        // when the cell is clicked, reverse its value and class
         if (cell.getAttributeNode("value").value == "1"){
             cell.getAttributeNode("value").value = "0";
             cell.getAttributeNode("class").value = "bg-red";
@@ -96,16 +101,21 @@
 
 <script>
     $("button").click(function() {
+        // sends an array of each preference that coordinates with availability.db
+
         var arr = [];
         $("td").each(function() {
+            // add each table cell's value to the array
             arr.push(this.getAttributeNode("value").value);
         });
         $.ajax({
+            // post the array to set_preferences
             url: '/set_preferences',
             type: 'POST',
             data: {
                 preferences: arr
             },
+            // return to home page upon success
             success: function(response){ window.location.href = "/"; }
         });
     });

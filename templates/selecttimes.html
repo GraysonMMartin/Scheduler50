@@ -7,12 +7,14 @@
 {% block scripts %}
 <script>
 
+    // start with an empty array with appropriate number of indexes
     var arr = [];
     for (var i = 0; i < 168; i++){
         arr.push(0);
     }
 
     function addTable(dates, preferences) {
+        // add the table to select times the user is available, with preferences reflected in the cells
         var availabilityTable = document.getElementById("availabilityTable");
 
         var tableBody = document.createElement('TBODY');
@@ -24,10 +26,12 @@
                         , "2 PM - 3 PM", "3 PM - 4 PM", "4 PM - 5 PM", "5 PM - 6 PM", "6 PM - 7 PM", "7 PM - 8 PM", "8 PM - 9 PM"
                         , "9 PM - 10 PM", "10 PM - 11 PM", "11 PM - 12 AM"]
 
+        // get array of preferences
         preferences = preferences.replace('[', '');
         preferences = preferences.replace(']', '');
         preferences = preferences.split(", ");
 
+        // get array of dates in the event
         dates = dates.replace('[','');
         dates = dates.replace(']','');
         let singleQuotes = new RegExp(/\'/g)
@@ -62,10 +66,13 @@
 
                 index = k;
                 if (k % 7 < firstDay){
+                    // go backwards in the preferences array if the value of first day is greater than the value of last day initially
+                    // e.g. event from Thu (4) to a Tue (2)
                     index -= 7;
                 }
                 day = k % 7;
                 if ((firstDay <= lastDay && day >= firstDay && day <= lastDay) || (firstDay > lastDay && (day >= firstDay || day <= lastDay))) {
+                    // create cells reflecting preferences if the day is part of the event
                     var td = document.createElement('TD');
                     if (preferences[index] == 1) {
                         td.setAttribute('class', 'bg-white');
@@ -74,6 +81,7 @@
                     else {
                         td.setAttribute('class', 'bg-red');
                     }
+                    // set id to index to easily organize the array of availability
                     td.setAttribute('id', String(index))
                     td.setAttribute('value', '0');
                     td.setAttribute('name', 'availability');
@@ -87,6 +95,7 @@
     }
 
     function updateAvailability(cell) {
+        // reverse the value and class of a cell when it is clicked
         if (cell.getAttributeNode("value").value == "1"){
             cell.getAttributeNode("value").value = "0";
             cell.getAttributeNode("class").value = "bg-white";
@@ -128,17 +137,21 @@
 
 <script>
     $("button").click(function() {
+        // send the event id and user availability to update the attendees db
         var id = "{{ event.id }}"
         $("td").each(function() {
+            // for every cell, update the availability array at index of id to be its value
             arr[this.getAttributeNode("id").value] = this.getAttributeNode("value").value;
         });
         $.ajax({
+            // post id and arr to selecttimes
             url: '/selecttimes',
             type: 'POST',
             data: {
                 id,
                 availability: arr
             },
+            // return to homepage on success
             success: function(response){ window.location.href = "/"; }
         });
     });
