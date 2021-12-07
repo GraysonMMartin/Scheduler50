@@ -338,7 +338,6 @@ def set_preferences():
             else:
                 db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[j]+str(i), preferences[k], session["user_id"])
             k += 1
-
     return redirect("/")
 
 @app.route("/contacts", methods=["GET"])
