@@ -35,7 +35,8 @@ def after_request(response):
 @login_required
 def home():
     """The home page which shows all of the user's events"""
-   
+
+   # By default show only future events
     try:
         filter = request.args["filter"]
     except:
@@ -113,6 +114,7 @@ def login():
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
+        # If the user is logging in for the first time then create a new entry in the availability table 
         if(db.execute("SELECT COUNT(*) AS count FROM availability WHERE user_id = ?", session["user_id"])[0].get("count") == 0):
             db.execute("INSERT INTO availability(user_id) VALUES(?)", session["user_id"])
             for i in range(24):
@@ -141,6 +143,7 @@ def logout():
 def preferences():
     """Allows the user to enter times at which they are not available"""
 
+    # Get when the user is available and convert that to a list which is used to populate the preferences table on preferences.html
     availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
     preferences = list(availability.values())[1:]
     return render_template("preferences.html", preferences=preferences)
@@ -278,7 +281,8 @@ def delete_event():
 def selecttimes():
     """Select possible times for a user to have a meeting"""
     if request.method == "POST":
-        # Get the information from the form
+        # Get the correct times from the availability table and save that information in the db.
+        # TODO: Out of bounds. Where does availability[] come from?
         availability = list(map(int, request.form.getlist('availability[]')))
         k = 0
         for i in range(24):
@@ -288,6 +292,7 @@ def selecttimes():
         
         return redirect("/")
     else:
+        # Make sure that the select times have taken the user's preferences into account
         event_id = request.args.get("event_id")
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
         start = event.get("start_date")
@@ -298,28 +303,6 @@ def selecttimes():
         preferences = list(availability.values())[1:]
 
         return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences, length=length)
-
-# @app.route("/selecttimes", methods=["GET", "POST"])
-# @login_required
-# def selecttimes():
-#     """Select possible times for a user to have a meeting"""
-#     if request.method == "POST":
-#         # Get the information from the form
-#         length = request.form.get("length")
-#         start = request.form.get("start")
-#         end = request.form.get("end")
-#         event_id = request.form.get("event_id")
-
-#         db.execute("UPDATE events SET length = ?, start_date = ?, end_date = ? WHERE id = ?", length, start, end, event_id)
-#         events = db.execute("SELECT * FROM events WHERE id IN (SELECT event_id FROM attendees WHERE person_id = ?)", session["user_id"])
-#         return render_template("index.html", events=events, user_id=session["user_id"])
-#     else:
-#         event_id = request.args.get("event_id")
-#         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
-#         start = event.get("start_date")
-#         end = event.get("end_date")
-#         dates = all_dates(start, end)
-
 #         # Change from UTC time to local time
 #         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
 #         #if TIME_DIFF < 0:
@@ -332,6 +315,7 @@ def selecttimes():
 @app.route("/view_responses")
 @login_required
 def view_responses():
+    """Get the number of people that have responded"""
     event_id = int(request.args.get("event_id"))
     title = db.execute("SELECT title FROM events WHERE id = ?", event_id)[0].get("title")
     total = db.execute("SELECT COUNT(*) AS total FROM attendees WHERE event_id = ?", event_id)[0].get("total")
@@ -341,25 +325,28 @@ def view_responses():
 @app.route("/set_preferences", methods=["POST"])
 @login_required
 def set_preferences():
+    """Update a user's preferences of when they could meet"""
     preferences = list(map(int, request.form.getlist('preferences[]')))
     k = 0
     days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] 
 
-    # Store the availability of a user
+    # Store the availability of a user with a time difference factored in
     for i in range(TIME_DIFF, 24 + TIME_DIFF):
         for j in range(0,len(days)):
+            # If we have a time difference of say -1 then we would need to go to the previous day
             if i < 0:
+                # Since Saturday is before Sunday but at the end of the list we would need to go one day before
                 if j == 0:
                     db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[6]+str(i+24), preferences[k], session["user_id"])
                 else:
                      db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[j]+str(i+24), preferences[k], session["user_id"])
-
+            # If we have a time difference of say +1 then we would need to go to the next day
             elif i > 24:
+                # If we get to Saturday and need to go the next day we would need to start again at Sunday
                 if j == 6:
                     db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[0]+str(i-24), preferences[k], session["user_id"])
                 else:
                      db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[j]+str(i-24), preferences[k], session["user_id"])
-
             else:
                 db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[j]+str(i), preferences[k], session["user_id"])
             k += 1
