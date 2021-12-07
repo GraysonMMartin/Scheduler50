@@ -5,7 +5,7 @@ import urllib.parse
 from flask import redirect, render_template, request, session
 from functools import wraps
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 def apology(message, code=400):
     """Render message as an apology to user."""
@@ -50,3 +50,13 @@ def valid_date(start_date,end_date):
         return False
         
     return True
+
+def all_dates(start_date, end_date):
+    start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    dates = []
+    delta = timedelta(days=1)
+    while start_date <= end_date:
+        dates.append(start_date.strftime('%Y-%m-%d'))
+        start_date += delta
+    return dates
