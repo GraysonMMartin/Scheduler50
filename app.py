@@ -292,12 +292,12 @@ def selecttimes():
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
         start = event.get("start_date")
         end = event.get("end_date")
-        duration = event.get("length")
+        length = event.get("length")
         dates = all_dates(start, end)
         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
         preferences = list(availability.values())[1:]
 
-        return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences, length=duration)
+        return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences, length=length)
 
 # @app.route("/selecttimes", methods=["GET", "POST"])
 # @login_required
