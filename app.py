@@ -31,18 +31,12 @@ def after_request(response):
 @login_required
 def home():
     """The home page which shows all of the user's events"""
-<<<<<<< HEAD
-    
-    filter = request.args["filter"]
-    
-=======
    
     try:
         filter = request.args["filter"]
     except:
         filter = "future"
    
->>>>>>> d1b60abbedc169c794298977ae32c18f141c763d
     if not filter:
         filter = "future"
 
