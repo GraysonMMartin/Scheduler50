@@ -322,19 +322,6 @@ def view_responses():
 @app.route("/set_preferences", methods=["POST"])
 @login_required
 def set_preferences():
-    #TODO: Store as UTC
-    # preferences = list(map(int, request.form.getlist('preferences[]')))
-    # k = 0
-    # for i in range(24):
-    #     for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
-    #         db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", j+str(i), preferences[k], session["user_id"])
-    #         k += 1
-    # return redirect("/")
-
-    # import timezone
-    # def utc_to_local(utc_dt):
-    # return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
-
     preferences = list(map(int, request.form.getlist('preferences[]')))
     k = 0
     days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] 
