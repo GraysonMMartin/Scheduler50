@@ -1,31 +1,3 @@
-<<<<<<< HEAD
-{% extends "layout.html" %}
-
-{% block title %}
-    Select Times
-{% endblock %}
-
-{% block main %}
-    <h2>Select times you are available for: {{ event.title }}</h2>
-
-    <form action="/selecttimes" method="post">
-        <div class="mb-3">
-
-            <label for="length">How long is the meeting?</label>
-            <input type="number" id="length" name="length" placeholder="minutes" min=0 max=720 required>
-
-            <label for="start">When are you free (start)?</label>
-            <input type="time" id="time" name="start" min="00:00" max="24:00" required>
-
-            <label for="end">When are you free (end)?</label>
-            <input type="time" id="time" name="end" min="00:00" max="24:00" required>
-
-            <button class="btn btn-primary" type="submit">submit</button>
-        </div>
-    </form>
-    <h6>Note: That by default the first meeting time we suggest will start (if possible) at the time at which you are first free</h6>
-    <h6>We also will take care of the time difference!</h6>
-=======
 {% extends "layout.html" %}
 
 {% block title %}
@@ -35,7 +7,7 @@
 {% block scripts %}
 <script>
 
-    function addTable(numDays, preferences) {
+    function addTable(dates, preferences) {
         var availabilityTable = document.getElementById("availabilityTable");
 
         var tableBody = document.createElement('TBODY');
@@ -47,29 +19,65 @@
                         , "2 PM - 3 PM", "3 PM - 4 PM", "4 PM - 5 PM", "5 PM - 6 PM", "6 PM - 7 PM", "7 PM - 8 PM", "8 PM - 9 PM"
                         , "9 PM - 10 PM", "10 PM - 11 PM", "11 PM - 12 AM"]
 
-        var k = 0;
-        preferences = preferences.replace('[', '')
-        preferences = preferences.replace(']', '')
-        preferences = preferences.split(", ")
+        preferences = preferences.replace('[', '');
+        preferences = preferences.replace(']', '');
+        preferences = preferences.split(", ");
+
+        dates = dates.replace('[','');
+        dates = dates.replace(']','');
+        let singleQuotes = new RegExp(/\'/g)
+        dates = dates.replace(singleQuotes, "");
+        dates = dates.split(", ");
+
+        var dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+        var first = dates[0];
+        var last = dates.at(-1);
+        var year = first.substring(0,4);
+        var month = first.substring(5,7);
+        var day = first.substring(8,10);
+        var start = new Date(year, month-1, day);
+        year = last.substring(0,4);
+        month = last.substring(5,7);
+        day = last.substring(8,10);
+        end = new Date(year, month-1, day);
+
+        var firstDay = dayNames.indexOf(dayNames[start.getDay()]);
+        var lastDay = dayNames.indexOf(dayNames[end.getDay()]);
+
+        var k = firstDay;
+        var day = 0;
+        var index = k;
+
         for (var i = 0; i < 24; i++) {
+    
             var tr = document.createElement('TR');
             tableBody.appendChild(tr);
 
-            for (var j = 0; j < numDays; j++) {
-                var td = document.createElement('TD');
-                if (preferences[k] == 1) {
-                    td.setAttribute('class', 'bg-white');
-                    td.setAttribute('value', '1');
+            for (var j = 0; j < 7; j++) {
+
+                index = k;
+                if (k % 7 < firstDay){
+                    index -= 7;
                 }
-                else {
-                    td.setAttribute('class', 'bg-red');
+                day = k % 7;
+                if ((firstDay <= lastDay && day >= firstDay && day <= lastDay) || (firstDay > lastDay && (day >= firstDay || day <= lastDay))) {
+                    var td = document.createElement('TD');
+                    if (preferences[index] == 1) {
+                        td.setAttribute('class', 'bg-white');
+                        td.setAttribute('onclick', 'updateAvailability(this)');
+                    }
+                    else {
+                        td.setAttribute('class', 'bg-red');
+                    }
+                    if (index > 167) {
+                        td.setAttribute('class', 'bg-green')
+                    }
                     td.setAttribute('value', '0');
+                    td.setAttribute('name', 'availability');
+                    td.appendChild(document.createTextNode(timeSlots[i]));
+                    tr.appendChild(td);
                 }
                 k++;
-                td.setAttribute('name', 'preferences');
-                td.setAttribute('onclick', 'updateAvailability(this)');
-                td.appendChild(document.createTextNode(timeSlots[i]));
-                tr.appendChild(td);
             }
         }
         myTableDiv.appendChild(table);
@@ -78,11 +86,11 @@
     function updateAvailability(cell) {
         if (cell.getAttributeNode("value").value == "1"){
             cell.getAttributeNode("value").value = "0";
-            cell.getAttributeNode("class").value = "bg-red";
+            cell.getAttributeNode("class").value = "bg-white";
         }
         else{
             cell.getAttributeNode("value").value = "1";
-            cell.getAttributeNode("class").value = "bg-white";
+            cell.getAttributeNode("class").value = "bg-green";
         }
     }
 
@@ -91,28 +99,45 @@
 {% endblock %}
 
 {% block main %}
-    <h2>Select times you are available for: {{ event.title }}</h2>
-    <div class="mb-3">
-        <h4>Description:</h4>
-        {{ event.description }}
-        <h4>Location:</h4>
-        {{ event.location }}
-    </div>
+<h2>Select times you are available for: {{ event.title }}</h2>
+<div class="mb-3">
+    <h4>Description:</h4>
+    {{ event.description }}
+    <h4>Location:</h4>
+    {{ event.location }}
+    <h4>Duration:</h4>
+    &#60;= {{ length }} hrs.
+</div>
 
-    <form action="/selecttimes" method="post">
-        <div class="mb-3">
-            <table class="table" id="availabilityTable">
-                <thead>
-                    {% for date in dates %}
-                        <th>{{ date }}</th>
-                    {% endfor %}
-                </thead>
-                <script>addTable("{{ dates|length }}", "{{ preferences|safe }}");</script>
-            </table>
-        </div>
-        <div class="mb-3">
-            <button class="btn btn-primary" type="submit">Submit</button>
-        </div>
-    </form>
->>>>>>> 3de81242dd4619f7208b5b9de16250439b04b2b1
+<div class="mb-3">
+    <table class="table" id="availabilityTable">
+        <thead>
+            {% for date in dates %}
+                <th>{{ date }}</th>
+            {% endfor %}
+        </thead>
+        <script>addTable("{{ dates|safe }}", "{{ preferences|safe }}");</script>
+    </table>
+</div>
+<div class="mb-3">
+    <button class="btn btn-primary" type="button">Submit</button>
+</div>
+
+<script>
+    $("button").click(function() {
+        var arr = [];
+        $("td").each(function() {
+            arr.push(this.getAttributeNode("value").value);
+        });
+        $.ajax({
+            url: '/selecttimes',
+            type: 'POST',
+            data: {
+                availabiity: arr
+            },
+            success: function(response){ window.location.href = "/"; }
+        });
+    });
+</script>
+
 {% endblock %}

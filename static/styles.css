@@ -18,6 +18,10 @@ td.bg-white {
     background-color: white;
 }
 
+td.bg-green {
+    background-color: #00ff00;
+}
+
 .unhighlightable {
     -webkit-touch-callout: none;
     -webkit-user-select: none;

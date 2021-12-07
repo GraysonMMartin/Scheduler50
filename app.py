@@ -8,7 +8,6 @@ from helpers import apology, login_required, valid_date, all_dates
 from datetime import datetime, time, timedelta
 import time
 import pytz
-from collections import deque 
 
 app = Flask(__name__)
 
@@ -23,7 +22,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Time zone differences
-TIME_DIFF = ((datetime.now(pytz.timezone(time.tzname[0])) - datetime.now(pytz.timezone("UTC")) ).total_seconds())/60/60
+TIME_DIFF = int(round(((datetime.now(pytz.timezone(time.tzname[0])) - datetime.now(pytz.timezone("UTC")) ).total_seconds())/60/60))
 
 @app.after_request
 def after_request(response):
@@ -286,9 +285,7 @@ def selecttimes():
         end = request.form.get("end")
         event_id = request.form.get("event_id")
 
-        # TODO
         db.execute("UPDATE events SET length = ?, start_date = ?, end_date = ? WHERE id = ?", length, start, end, event_id)
-
         events = db.execute("SELECT * FROM events WHERE id IN (SELECT event_id FROM attendees WHERE person_id = ?)", session["user_id"])
         return render_template("index.html", events=events, user_id=session["user_id"])
     else:
@@ -300,15 +297,11 @@ def selecttimes():
 
         # Change from UTC time to local time
         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
-        preferences = list(availability.values())[1:]
-
-        # https://www.kite.com/python/answers/how-to-shift-elements-in-a-list-in-python
-        moved_up = deque([1, 2, 3, 4, 5])
-
-        #Shift `a_list` 2 places to the right
-        moved_up.rotate(TIME_DIFF)
-        preferences = list(moved_up)
-
+        if TIME_DIFF < 0:
+            preferences = list(availability.values())[(24 + TIME_DIFF)*7:].append(list(availability.values())[:(24 + TIME_DIFF)*7])
+        else:
+            preferences = list(availability.values())[TIME_DIFF*7:].append(list(availability.values())[:TIME_DIFF*7])
+        preferences = list(availability.values())[1:]   
         return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
 
 @app.route("/view_responses")
