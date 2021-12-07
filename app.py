@@ -5,9 +5,10 @@ from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import apology, login_required, valid_date, all_dates
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 import time
 import pytz
+from collections import deque 
 
 app = Flask(__name__)
 
@@ -22,7 +23,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Time zone differences
-TIME_DIFF = round(datetime.now(pytz.timezone(time.tzname[0])) - datetime.now(pytz.timezone("UTC")).total_seconds()/60/60)
+TIME_DIFF = ((datetime.now(pytz.timezone(time.tzname[0])) - datetime.now(pytz.timezone("UTC")) ).total_seconds())/60/60
 
 @app.after_request
 def after_request(response):
@@ -302,7 +303,7 @@ def selecttimes():
         preferences = list(availability.values())[1:]
 
         # https://www.kite.com/python/answers/how-to-shift-elements-in-a-list-in-python
-        moved_up = collections.deque([1, 2, 3, 4, 5])
+        moved_up = deque([1, 2, 3, 4, 5])
 
         #Shift `a_list` 2 places to the right
         moved_up.rotate(TIME_DIFF)
