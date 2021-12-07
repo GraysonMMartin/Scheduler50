@@ -1,11 +1,7 @@
-import os
-import requests
-import urllib.parse
-
-from flask import redirect, render_template, request, session
+from flask import redirect, render_template, session
 from functools import wraps
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 
 def apology(message, code=400):
     """Render message as an apology to user."""
