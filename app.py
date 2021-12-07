@@ -275,26 +275,25 @@ def selecttimes():
     """Select possible times for a user to have a meeting"""
     if request.method == "POST":
         # Get the information from the form
-        length = request.form.get("length")
-        start = request.form.get("start")
-        end = request.form.get("end")
-        event_id = request.form.get("event_id")
-
-        # TODO
-        db.execute("UPDATE events SET length = ?, start_date = ?, end_date = ? WHERE id = ?", length, start, end, event_id)
-
-        events = db.execute("SELECT * FROM events WHERE id IN (SELECT event_id FROM attendees WHERE person_id = ?)", session["user_id"])
-        return render_template("index.html", events=events, user_id=session["user_id"])
+        availability = list(map(int, request.form.getlist('availability[]')))
+        k = 0
+        for i in range(24):
+            for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+                db.execute("UPDATE attendees SET ? = ? WHERE user_id = ?", j+str(i), preferences[k], session["user_id"])
+                k += 1
+        
+        return redirect("/")
     else:
         event_id = request.args.get("event_id")
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
         start = event.get("start_date")
         end = event.get("end_date")
+        duration = event.get("length")
         dates = all_dates(start, end)
         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
         preferences = list(availability.values())[1:]
 
-        return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
+        return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences, length=duration)
 
 @app.route("/view_responses")
 @login_required
