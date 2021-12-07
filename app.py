@@ -8,7 +8,6 @@ from helpers import apology, login_required, valid_date, all_dates
 from datetime import datetime, time, timedelta
 import time
 import pytz
-from collections import deque 
 
 app = Flask(__name__)
 
@@ -298,7 +297,10 @@ def selecttimes():
 
         # Change from UTC time to local time
         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
-        # preferences = list(deque(list(availability.values())[1:]).rotate(TIME_DIFF))
+        if TIME_DIFF < 0:
+            preferences = list(availability.values())[(24 + TIME_DIFF)*7:].append(list(availability.values())[:(24 + TIME_DIFF)*7])
+        else:
+            preferences = list(availability.values())[TIME_DIFF*7:].append(list(availability.values())[:TIME_DIFF*7])
         preferences = list(availability.values())[1:]
         return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
 
