@@ -99,45 +99,45 @@
 {% endblock %}
 
 {% block main %}
-    <h2>Select times you are available for: {{ event.title }}</h2>
-    <div class="mb-3">
-        <h4>Description:</h4>
-        {{ event.description }}
-        <h4>Location:</h4>
-        {{ event.location }}
-        <h4>Duration:</h4>
-        &#60;= {{ length }} hrs.
-    </div>
+<h2>Select times you are available for: {{ event.title }}</h2>
+<div class="mb-3">
+    <h4>Description:</h4>
+    {{ event.description }}
+    <h4>Location:</h4>
+    {{ event.location }}
+    <h4>Duration:</h4>
+    &#60;= {{ length }} hrs.
+</div>
 
-    <div class="mb-3">
-        <table class="table" id="availabilityTable">
-            <thead>
-                {% for date in dates %}
-                    <th>{{ date }}</th>
-                {% endfor %}
-            </thead>
-            <script>addTable("{{ dates|safe }}", "{{ preferences|safe }}");</script>
-        </table>
-    </div>
-    <div class="mb-3">
-        <button class="btn btn-primary" type="button">Submit</button>
-    </div>
+<div class="mb-3">
+    <table class="table" id="availabilityTable">
+        <thead>
+            {% for date in dates %}
+                <th>{{ date }}</th>
+            {% endfor %}
+        </thead>
+        <script>addTable("{{ dates|safe }}", "{{ preferences|safe }}");</script>
+    </table>
+</div>
+<div class="mb-3">
+    <button class="btn btn-primary" type="button">Submit</button>
+</div>
 
-    <script>
-        $("button").click(function() {
-            var arr = [];
-            $("td").each(function() {
-                arr.push(this.getAttributeNode("value").value);
-            });
-            $.ajax({
-                url: '/selecttimes',
-                type: 'POST',
-                data: {
-                    availabiity: arr
-                },
-                success: function(response){ window.location.href = "/"; }
-            });
+<script>
+    $("button").click(function() {
+        var arr = [];
+        $("td").each(function() {
+            arr.push(this.getAttributeNode("value").value);
         });
-    </script>
+        $.ajax({
+            url: '/selecttimes',
+            type: 'POST',
+            data: {
+                availabiity: arr
+            },
+            success: function(response){ window.location.href = "/"; }
+        });
+    });
+</script>
 
 {% endblock %}

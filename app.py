@@ -301,7 +301,7 @@ def selecttimes():
             preferences = list(availability.values())[(24 + TIME_DIFF)*7:].append(list(availability.values())[:(24 + TIME_DIFF)*7])
         else:
             preferences = list(availability.values())[TIME_DIFF*7:].append(list(availability.values())[:TIME_DIFF*7])
-        preferences = list(availability.values())[1:]
+        preferences = list(availability.values())[1:]   
         return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
 
 @app.route("/view_responses")
