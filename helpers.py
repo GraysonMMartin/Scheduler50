@@ -56,3 +56,4 @@ def all_dates(start_date, end_date):
         dates.append(start_date.strftime('%Y-%m-%d'))
         start_date += delta
     return dates
+

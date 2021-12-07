@@ -53,9 +53,9 @@
             var tr = document.createElement('TR');
             tableBody.appendChild(tr);
 
-            var td = document.createElement('TD');
-            td.appendChild(timeSlots[i]);
-            tr.appendChild(td);
+            var time = document.createElement('TD');
+            time.appendChild(document.createTextNode(timeSlots[i]));
+            tr.appendChild(time);
 
 
             for (var j = 0; j < 7; j++) {

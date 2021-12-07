@@ -352,9 +352,9 @@ def view_responses():
     num_available = []
     for i in range(24):
         for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
-            count = db.execute("SELECT SUM(?) AS sum FROM attendees WHERE event_id = ?", j+str(i), event_id)[0].get("sum")
+            # note that this is not user input and ? syntax does not work for sum
+            count = db.execute(f"SELECT SUM({j+str(i)}) AS sum FROM attendees WHERE event_id = ?", event_id)[0].get("sum")
             num_available.append(count)
-    print(num_available)
     start = event.get("start_date")
     end = event.get("end_date")
     dates = all_dates(start, end)
@@ -362,6 +362,7 @@ def view_responses():
 
 @app.route("/set_preferences", methods=["POST"])
 @login_required
+
 def set_preferences():
     preferences = list(map(int, request.form.getlist('preferences[]')))
     k = 0
