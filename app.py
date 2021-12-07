@@ -177,7 +177,12 @@ def create():
 
         # Create a new attendenace entry into attendees (this is for the currrent user)
         db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, session["user_id"], 0)
-
+        preferences = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
+        for i in range(24):
+            for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+                column_name = j+str(i)
+                db.execute("UPDATE attendees SET ? = ? WHERE person_id = ? AND event_id = ?", column_name, preferences.get(column_name), session["user_id"], current_id)
+    
         # Get the usernames of those who will attend
         current_invitees = db.execute("SELECT username FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
                         current_id)
@@ -205,6 +210,11 @@ def addinvitees():
 
         # Create a new attendenace entry into attendees (this is for the guests)
         db.execute("INSERT INTO attendees(event_id, person_id, responded) VALUES(?, ?, ?)", current_id, guest_id, 0)
+        preferences = db.execute("SELECT * FROM availability WHERE user_id = ?", guest_id)[0]
+        for i in range(24):
+            for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+                column_name = j+str(i)
+                db.execute("UPDATE attendees SET ? = ? WHERE person_id = ? AND event_id = ?", column_name, preferences.get(column_name), guest_id, current_id)
         current_invitees = db.execute("SELECT * FROM users WHERE id IN (SELECT person_id FROM attendees WHERE event_id = ?)",
                         current_id)
         
@@ -279,38 +289,76 @@ def selecttimes():
     """Select possible times for a user to have a meeting"""
     if request.method == "POST":
         # Get the information from the form
-        length = request.form.get("length")
-        start = request.form.get("start")
-        end = request.form.get("end")
-        event_id = request.form.get("event_id")
-
-        db.execute("UPDATE events SET length = ?, start_date = ?, end_date = ? WHERE id = ?", length, start, end, event_id)
-        events = db.execute("SELECT * FROM events WHERE id IN (SELECT event_id FROM attendees WHERE person_id = ?)", session["user_id"])
-        return render_template("index.html", events=events, user_id=session["user_id"])
+        event_id = request.form.get("id")
+        availability = list(map(int, request.form.getlist('availability[]')))
+        db.execute("UPDATE attendees SET responded = 1 WHERE person_id = ? AND event_id = ?", session["user_id"], event_id)
+        k = 0
+        for i in range(24):
+            for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+                db.execute("UPDATE attendees SET ? = ? WHERE person_id = ?", j+str(i), availability[k], session["user_id"])
+                k += 1
+        
+        return redirect("/")
     else:
         event_id = request.args.get("event_id")
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
         start = event.get("start_date")
         end = event.get("end_date")
+        length = event.get("length")
         dates = all_dates(start, end)
-
-        # Change from UTC time to local time
         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
-        if TIME_DIFF < 0:
-            preferences = list(availability.values())[(24 + TIME_DIFF)*7:].append(list(availability.values())[:(24 + TIME_DIFF)*7])
-        else:
-            preferences = list(availability.values())[TIME_DIFF*7:].append(list(availability.values())[:TIME_DIFF*7])
-        preferences = list(availability.values())[1:]   
-        return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
+        preferences = list(availability.values())[1:]
+
+        return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences, length=length)
+
+# @app.route("/selecttimes", methods=["GET", "POST"])
+# @login_required
+# def selecttimes():
+#     """Select possible times for a user to have a meeting"""
+#     if request.method == "POST":
+#         # Get the information from the form
+#         length = request.form.get("length")
+#         start = request.form.get("start")
+#         end = request.form.get("end")
+#         event_id = request.form.get("event_id")
+
+#         db.execute("UPDATE events SET length = ?, start_date = ?, end_date = ? WHERE id = ?", length, start, end, event_id)
+#         events = db.execute("SELECT * FROM events WHERE id IN (SELECT event_id FROM attendees WHERE person_id = ?)", session["user_id"])
+#         return render_template("index.html", events=events, user_id=session["user_id"])
+#     else:
+#         event_id = request.args.get("event_id")
+#         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
+#         start = event.get("start_date")
+#         end = event.get("end_date")
+#         dates = all_dates(start, end)
+
+#         # Change from UTC time to local time
+#         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
+#         #if TIME_DIFF < 0:
+#         #    preferences = list(availability.values())[(24 + TIME_DIFF)*7:].append(list(availability.values())[:(24 + TIME_DIFF)*7])
+#         #else:
+#         #    preferences = list(availability.values())[TIME_DIFF*7:].append(list(availability.values())[:TIME_DIFF*7])
+#         preferences = list(availability.values())[1:]   
+#         return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
 
 @app.route("/view_responses")
 @login_required
 def view_responses():
     event_id = int(request.args.get("event_id"))
-    title = db.execute("SELECT title FROM events WHERE id = ?", event_id)[0].get("title")
+    event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
+    title = event.get("title")
     total = db.execute("SELECT COUNT(*) AS total FROM attendees WHERE event_id = ?", event_id)[0].get("total")
     responded = db.execute("SELECT COUNT(*) AS responded FROM attendees WHERE event_id = ? and responded = 1", event_id)[0].get("responded")
-    return render_template("responses.html", title=title, total=total, responded=responded)
+    num_available = []
+    for i in range(24):
+        for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
+            count = db.execute("SELECT SUM(?) AS sum FROM attendees WHERE event_id = ?", j+str(i), event_id)[0].get("sum")
+            num_available.append(count)
+    print(num_available)
+    start = event.get("start_date")
+    end = event.get("end_date")
+    dates = all_dates(start, end)
+    return render_template("responses.html", title=title, total=total, responded=responded, dates=dates, responses=num_available)
 
 @app.route("/set_preferences", methods=["POST"])
 @login_required

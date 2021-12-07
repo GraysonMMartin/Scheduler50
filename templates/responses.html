@@ -4,7 +4,92 @@
     Responses
 {% endblock %}
 
+{% block scripts %}
+<script>
+
+    const timeSlots = ["12 AM - 1 AM", "1 AM - 2 AM", "2 AM - 3 AM", "3 AM - 4 AM", "4 AM - 5 AM", "5 AM - 6 AM", "6 AM - 7 AM"
+                        , "7 AM - 8 AM", "8 AM - 9 AM", "9 AM - 10 AM", "10 AM - 11 AM", "11 AM - 12 PM", "12 PM - 1 PM", "1 PM - 2 PM"
+                        , "2 PM - 3 PM", "3 PM - 4 PM", "4 PM - 5 PM", "5 PM - 6 PM", "6 PM - 7 PM", "7 PM - 8 PM", "8 PM - 9 PM"
+                        , "9 PM - 10 PM", "10 PM - 11 PM", "11 PM - 12 AM"]
+
+    function addTable(dates, responses) {
+        var availabilityTable = document.getElementById("availabilityTable");
+
+        var tableBody = document.createElement('TBODY');
+        tableBody.className = "unhighlightable";
+        availabilityTable.appendChild(tableBody);
+
+        responses = responses.replace('[', '');
+        responses = responses.replace(']', '');
+        responses = responses.split(", ");
+
+        dates = dates.replace('[','');
+        dates = dates.replace(']','');
+        let singleQuotes = new RegExp(/\'/g)
+        dates = dates.replace(singleQuotes, "");
+        dates = dates.split(", ");
+
+        var dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+        var first = dates[0];
+        var last = dates.at(-1);
+        var year = first.substring(0,4);
+        var month = first.substring(5,7);
+        var day = first.substring(8,10);
+        var start = new Date(year, month-1, day);
+        year = last.substring(0,4);
+        month = last.substring(5,7);
+        day = last.substring(8,10);
+        end = new Date(year, month-1, day);
+
+        var firstDay = dayNames.indexOf(dayNames[start.getDay()]);
+        var lastDay = dayNames.indexOf(dayNames[end.getDay()]);
+
+        var k = firstDay;
+        var day = 0;
+        var index = k;
+
+        for (var i = 0; i < 24; i++) {
+    
+            var tr = document.createElement('TR');
+            tableBody.appendChild(tr);
+
+            var td = document.createElement('TD');
+            td.appendChild(timeSlots[i]);
+            tr.appendChild(td);
+
+
+            for (var j = 0; j < 7; j++) {
+
+                index = k;
+                if (k % 7 < firstDay){
+                    index -= 7;
+                }
+                day = k % 7;
+                if ((firstDay <= lastDay && day >= firstDay && day <= lastDay) || (firstDay > lastDay && (day >= firstDay || day <= lastDay))) {
+                    var td = document.createElement('TD');
+                    td.appendChild(document.createTextNode(String(responses[index]+"/"+"{{ responded }}")));
+                    tr.appendChild(td);
+                }
+                k++;
+            }
+        }
+        myTableDiv.appendChild(table);
+    }
+
+</script>
+
+{% endblock %}
+
 {% block main %}
     <h2>{{ title }}</h2>
     {{ responded }}/{{ total }} invitees have responded.
+    <table class="table" id="availabilityTable">
+        <thead>
+            <th>Time</th>
+            {% for date in dates %}
+                <th>{{ date }}</th>
+            {% endfor %}
+        </thead>
+        <script>addTable("{{ dates|safe }}", "{{ responses|safe }}");</script>
+    </table>
 {% endblock %}

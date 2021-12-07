@@ -7,6 +7,11 @@
 {% block scripts %}
 <script>
 
+    var arr = [];
+    for (var i = 0; i < 168; i++){
+        arr.push(0);
+    }
+
     function addTable(dates, preferences) {
         var availabilityTable = document.getElementById("availabilityTable");
 
@@ -69,9 +74,7 @@
                     else {
                         td.setAttribute('class', 'bg-red');
                     }
-                    if (index > 167) {
-                        td.setAttribute('class', 'bg-green')
-                    }
+                    td.setAttribute('id', String(index))
                     td.setAttribute('value', '0');
                     td.setAttribute('name', 'availability');
                     td.appendChild(document.createTextNode(timeSlots[i]));
@@ -125,15 +128,16 @@
 
 <script>
     $("button").click(function() {
-        var arr = [];
+        var id = "{{ event.id }}"
         $("td").each(function() {
-            arr.push(this.getAttributeNode("value").value);
+            arr[this.getAttributeNode("id").value] = this.getAttributeNode("value").value;
         });
         $.ajax({
             url: '/selecttimes',
             type: 'POST',
             data: {
-                availabiity: arr
+                id,
+                availability: arr
             },
             success: function(response){ window.location.href = "/"; }
         });
