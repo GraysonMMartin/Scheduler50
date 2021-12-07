@@ -4,24 +4,86 @@
     Select Times
 {% endblock %}
 
+{% block scripts %}
+<script>
+
+    function addTable(numDays, preferences) {
+        var availabilityTable = document.getElementById("availabilityTable");
+
+        var tableBody = document.createElement('TBODY');
+        tableBody.className = "unhighlightable";
+        availabilityTable.appendChild(tableBody);
+
+        const timeSlots = ["12 AM - 1 AM", "1 AM - 2 AM", "2 AM - 3 AM", "3 AM - 4 AM", "4 AM - 5 AM", "5 AM - 6 AM", "6 AM - 7 AM"
+                        , "7 AM - 8 AM", "8 AM - 9 AM", "9 AM - 10 AM", "10 AM - 11 AM", "11 AM - 12 PM", "12 PM - 1 PM", "1 PM - 2 PM"
+                        , "2 PM - 3 PM", "3 PM - 4 PM", "4 PM - 5 PM", "5 PM - 6 PM", "6 PM - 7 PM", "7 PM - 8 PM", "8 PM - 9 PM"
+                        , "9 PM - 10 PM", "10 PM - 11 PM", "11 PM - 12 AM"]
+
+        var k = 0;
+        preferences = preferences.replace('[', '')
+        preferences = preferences.replace(']', '')
+        preferences = preferences.split(", ")
+        for (var i = 0; i < 24; i++) {
+            var tr = document.createElement('TR');
+            tableBody.appendChild(tr);
+
+            for (var j = 0; j < numDays; j++) {
+                var td = document.createElement('TD');
+                if (preferences[k] == 1) {
+                    td.setAttribute('class', 'bg-white');
+                    td.setAttribute('value', '1');
+                }
+                else {
+                    td.setAttribute('class', 'bg-red');
+                    td.setAttribute('value', '0');
+                }
+                k++;
+                td.setAttribute('name', 'preferences');
+                td.setAttribute('onclick', 'updateAvailability(this)');
+                td.appendChild(document.createTextNode(timeSlots[i]));
+                tr.appendChild(td);
+            }
+        }
+        myTableDiv.appendChild(table);
+    }
+
+    function updateAvailability(cell) {
+        if (cell.getAttributeNode("value").value == "1"){
+            cell.getAttributeNode("value").value = "0";
+            cell.getAttributeNode("class").value = "bg-red";
+        }
+        else{
+            cell.getAttributeNode("value").value = "1";
+            cell.getAttributeNode("class").value = "bg-white";
+        }
+    }
+
+</script>
+
+{% endblock %}
+
 {% block main %}
     <h2>Select times you are available for: {{ event.title }}</h2>
+    <div class="mb-3">
+        <h4>Description:</h4>
+        {{ event.description }}
+        <h4>Location:</h4>
+        {{ event.location }}
+    </div>
 
     <form action="/selecttimes" method="post">
         <div class="mb-3">
-
-            <label for="length">How long is the meeting?</label>
-            <input type="number" id="length" name="length" placeholder="minutes" min=0 max=720 required>
-
-            <label for="start">When are you free (start)?</label>
-            <input type="time" id="time" name="start" min="00:00" max="24:00" required>
-
-            <label for="end">When are you free (end)?</label>
-            <input type="time" id="time" name="end" min="00:00" max="24:00" required>
-
-            <button class="btn btn-primary" type="submit">submit</button>
+            <table class="table" id="availabilityTable">
+                <thead>
+                    {% for date in dates %}
+                        <th>{{ date }}</th>
+                    {% endfor %}
+                </thead>
+                <script>addTable("{{ dates|length }}", "{{ preferences|safe }}");</script>
+            </table>
+        </div>
+        <div class="mb-3">
+            <button class="btn btn-primary" type="submit">Submit</button>
         </div>
     </form>
-    <h6>Note: That by default the first meeting time we suggest will start (if possible) at the time at which you are first free</h6>
-    <h6>We also will take care of the time difference!</h6>
 {% endblock %}

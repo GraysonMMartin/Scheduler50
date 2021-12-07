@@ -4,7 +4,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-from helpers import apology, login_required, valid_date
+from helpers import apology, login_required, valid_date, all_dates
 from datetime import datetime, date
 
 app = Flask(__name__)
@@ -288,7 +288,13 @@ def selecttimes():
     else:
         event_id = request.args.get("event_id")
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
-        return render_template("selecttimes.html", event=event)
+        start = event.get("start_date")
+        end = event.get("end_date")
+        dates = all_dates(start, end)
+        availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
+        preferences = list(availability.values())[1:]
+
+        return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
 
 @app.route("/view_responses")
 @login_required
