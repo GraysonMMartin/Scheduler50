@@ -1,14 +1,14 @@
 # Scheduler50
-Description:
+## Description:
 This locally hosted website allows users to schedule events with other users and select the best time to host an event (an improved when2meet if you will).
 
-Languages Used:
+## Languages Used:
 HTML, CSS, JavaScript, Jinja (with Flask), SQL, Python
 
-Challenges and plans for the future:
+## Challenges and plans for the future:
 We struggled a lot initially with collaborating via git with merge conflicts causing quite a lot of problems. The other largest problem was with time zone conversion as we had an intuitive idea of how we thought it could work, but we turned out to be vastly wrong. We also planned to have google calendar integration but after struggling for more than two days with it and having got nowhere we decided to rather focus on the other parts of the project.
 
-How to use the project:
+## How to use the project:
 When you open the project you are taken to the login screen where you can log in if you have already registered or 
 Register yourself as a user and send the link (should it be published) to your friends/colleagues to register themselves (register.html).
 
@@ -20,18 +20,18 @@ If you click on Preferences on the navigation bar (preferences.html) you will be
 
 Should there be a user error or other HTML error the apology.html page will run and display a photo of a cat with the error code and its description. 
 
-Alternative uses to the project:
+## Alternative uses to the project:
 You could consider building on this project and adding additional functionality or publishing this website.
 You could use it to see the interaction between the different programming languages used to give yourself a practical example of how to use it.
 
-Credits:
+## Credits:
 Matthew Andrews
 https://github.com/MHAndrews
 Grayson Martin
 https://github.com/GraysonMMartin 
 
-How to contribute:
+## How to contribute:
 Clone this repository and work on anything you are interested in. Then either email matthew_andrews@college.harvard.edu or graysonmartin@college.harvard.edu and we can talk about adding you as a collaborator. 
 
-License:
+## License:
 Can be viewed at License.md
