@@ -24,6 +24,29 @@ HTML is the markup language of choice for this project.  When combined with Java
 
 We used Flask as the framework for this website, so our backend is maintained with Python code.  We are able to communicate with the database through the cs50 library for Python.  Other libraries used include werkzeug for security and datetime, time, and pytz for time zone conversion and date alterations.
 
+The backend has several routes for various Scheduler50 displays and functions:
+- "/" - the default home route displaying information relevant to the user
+- "register" - deals with user registration and updates the db accordingly 
+  - Checks for basic registration (username availability, password and confirmation password match)
+- "login" - allows user to login
+- "logout" - allows user to logout, clears Flask session
+- "set_preferences" - updates the user's availability table based on new preferences (template rendered in "preferences" route)
+- "create" - allows the user to create an event
+  - Renders templates to add invitees to the event and select times that the creator is available
+  - Updates the events table to reflect event data
+- "addinvitees" - allows a user to add invitees to their event
+  - Updates the attendees table to reflect new invitees
+  - Includes form posting to "removeinvitee" route that deletes an invitee and updates the attendees table
+- "edit" - allows the user to edit events they have created
+  - Renders the create template with data from the events table
+  - Updates the db when form is posted
+  - Includes form to "deleteevent" route to delete an event and update the events table
+- "selecttimes" - allows the user to select times they are available for a specefic event
+  - Template is rendered with data from preferences reflected in the table
+  - When form is posted, attendees table is updated
+- "view_responses" - allows the creator of an event to view the responses from their own and other user's attendee data
+- "contacts" - allows a user to see the username of other users they have invited to events in the past
+
 ## CSS, bootstrap, CS50
 
 Most of the stylistic elements of the website are implemented with the Bootstrap framework.  Many of the designs found on our website resemble those of a past CS50 pset, "Finance."  Our own CSS file is utilized to change the color of cells and make it so that users are not able to highlight text within cells with their mouse.
