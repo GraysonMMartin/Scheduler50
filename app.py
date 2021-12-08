@@ -3,7 +3,7 @@ from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-from helpers import apology, login_required, valid_date, all_dates
+from helpers import apology, login_required, valid_date, all_dates, time_diff
 from datetime import datetime, time
 import time
 import pytz
@@ -145,8 +145,7 @@ def preferences():
 
     # Get when the user is available and convert that to a list which is used to populate the preferences table on preferences.html
     availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
-    preferences = list(availability.values())[1:]
-    return render_template("preferences.html", preferences=preferences)
+    return render_template("preferences.html", preferences=time_diff(availability,TIME_DIFF))
 
 @app.route("/create", methods=["GET", "POST"])
 @login_required
@@ -296,9 +295,27 @@ def selecttimes():
         availability = list(map(int, request.form.getlist('availability[]')))
         db.execute("UPDATE attendees SET responded = 1 WHERE person_id = ? AND event_id = ?", session["user_id"], event_id)
         k = 0
-        for i in range(24):
-            for j in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
-                db.execute("UPDATE attendees SET ? = ? WHERE person_id = ?", j+str(i), availability[k], session["user_id"])
+        days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] 
+
+        # Store the availability of a user with a time difference factored in with regards to this event (attendees table)
+        for i in range(TIME_DIFF, 24 + TIME_DIFF):
+            for j in range(0,len(days)):
+                # If we have a time difference of say -1 then we would need to go to the previous day
+                if i < 0:
+                    # Since Saturday is before Sunday but at the end of the list we would need to go one day before
+                    if j == 0:
+                        db.execute("UPDATE attendees SET ? = ? WHERE person_id = ? AND event_id = ?", days[6]+str(i+24), availability[k], session["user_id"], event_id)
+                    else:
+                        db.execute("UPDATE attendees SET ? = ? WHERE person_id = ? AND event_id = ?", days[j]+str(i+24), availability[k], session["user_id"], event_id)
+                # If we have a time difference of say +1 then we would need to go to the next day
+                elif i > 24:
+                    # If we get to Saturday and need to go the next day we would need to start again at Sunday
+                    if j == 6:
+                        db.execute("UPDATE attendees SET ? = ? WHERE person_id = ? AND event_id = ?", days[0]+str(i-24), availability[k], session["user_id"], event_id)
+                    else:
+                        db.execute("UPDATE attendees SET ? = ? WHERE person_id = ? AND event_id = ?", days[j]+str(i-24), availability[k], session["user_id"], event_id)
+                else:
+                    db.execute("UPDATE attendees SET ? = ? WHERE person_id = ? AND event_id = ?", days[j]+str(i), availability[k], session["user_id"], event_id)
                 k += 1
         
         return redirect("/")
@@ -308,20 +325,10 @@ def selecttimes():
         event = db.execute("SELECT * FROM events WHERE id = ?", event_id)[0]
         start = event.get("start_date")
         end = event.get("end_date")
-        length = event.get("length")
         dates = all_dates(start, end)
         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
-        preferences = list(availability.values())[1:]
 
-        return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences, length=length)
-#         # Change from UTC time to local time
-#         availability = db.execute("SELECT * FROM availability WHERE user_id = ?", session["user_id"])[0]
-#         #if TIME_DIFF < 0:
-#         #    preferences = list(availability.values())[(24 + TIME_DIFF)*7:].append(list(availability.values())[:(24 + TIME_DIFF)*7])
-#         #else:
-#         #    preferences = list(availability.values())[TIME_DIFF*7:].append(list(availability.values())[:TIME_DIFF*7])
-#         preferences = list(availability.values())[1:]   
-#         return render_template("selecttimes.html", event=event, dates=dates, preferences=preferences)
+        return render_template("selecttimes.html", event=event, dates=dates, preferences=time_diff(availability, TIME_DIFF))
 
 @app.route("/view_responses")
 @login_required
@@ -364,7 +371,7 @@ def set_preferences():
                 else:
                      db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[j]+str(i+24), preferences[k], session["user_id"])
             # If we have a time difference of say +1 then we would need to go to the next day
-            elif i > 24:
+            elif i > 23:
                 # If we get to Saturday and need to go the next day we would need to start again at Sunday
                 if j == 6:
                     db.execute("UPDATE availability SET ? = ? WHERE user_id = ?", days[0]+str(i-24), preferences[k], session["user_id"])

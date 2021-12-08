@@ -48,6 +48,9 @@ def valid_date(start_date,end_date):
     return True
 
 def all_dates(start_date, end_date):
+    """
+    Make all the dates between two dates
+    """
     start_date = datetime.strptime(start_date, '%Y-%m-%d')
     end_date = datetime.strptime(end_date, '%Y-%m-%d')
     dates = []
@@ -57,3 +60,13 @@ def all_dates(start_date, end_date):
         start_date += delta
     return dates
 
+def time_diff(availability, TIME_DIFF):
+    """
+    Convert UTC to Local time
+    """
+    if TIME_DIFF < 0:
+       return list(availability.values())[((24 + TIME_DIFF)*7 + 1):] + list(availability.values())[:((24 + TIME_DIFF)*7 + 1)]
+    elif TIME_DIFF == 0:
+        return list(availability.values())[1:]
+    else:
+       return list(availability.values())[(TIME_DIFF*7 + 1):] + list(availability.values())[:(TIME_DIFF*7 + 1)]
