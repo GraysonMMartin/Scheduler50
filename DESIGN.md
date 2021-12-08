@@ -59,4 +59,13 @@ JavaScript allowed us to significantly enhance the user interface of Scheduler50
 
 Jinja provieded us with a simple way to create html templates and pass data from the backend into html files.
 
-## Errors
+
+# How to get Scheduler50 running on your device
+
+## Installs
+
+Using pip, install Flask, datetime, time, and pytz on your device
+
+## Framework
+
+The framework requires a flask_session folder in the same folder as your project to store session data.  Simply go to the Scheduler50 folder on your device and create a flask_session folder.
