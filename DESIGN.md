@@ -1,6 +1,6 @@
 # Design of Scheduler50
 
- technically, how you implemented your project and why you made the design decisions you did. Your design document should be at least several paragraphs in length. Whereas your documentation is meant to be a user’s manual, consider your design document your opportunity to give the staff a technical tour of your project underneath its hood.
+ Technically, how you implemented your project and why you made the design decisions you did. Your design document should be at least several paragraphs in length. Whereas your documentation is meant to be a user’s manual, consider your design document your opportunity to give the staff a technical tour of your project underneath its hood.
 
 # Scheduler50 had the following design goals, in this order:
 - To be difficult to misuse
@@ -53,7 +53,7 @@ Most of the stylistic elements of the website are implemented with the Bootstrap
 
 ## JavaScript
 
-JavaScript allowed us to significantly enhance the user interface of Scheduler50, especially when creating the tables needed for user input and displaying the tables representing user input.  We used AJAX for some of the more complicated POST requests throughout the project.
+JavaScript allowed us to significantly enhance the user interface of Scheduler50, especially when creating the tables needed for user input and displaying the tables representing user input.  We used AJAX for some of the more complicated POST requests throughout the project.  Much of the project is based around our ability to get the value of specefic HTML elements and use that data to update our SQLite tables and render other templates.
 
 ## Jinja
 
